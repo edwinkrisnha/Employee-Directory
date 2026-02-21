@@ -5,18 +5,23 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// ---------------------------------------------------------------------------
+// Query helpers
+// ---------------------------------------------------------------------------
+
 /**
- * Query employees using WP_User_Query.
+ * Build and run a WP_User_Query for employees, returning the query object.
+ * Use this when you need both results and total count (e.g. for pagination).
  *
  * @param array $args {
  *   @type string $search     Search term matched against name and email.
  *   @type string $department Filter by exact department value.
- *   @type int    $per_page   Number of results. Default 200.
+ *   @type int    $per_page   Number of results. Default: value from plugin settings.
  *   @type int    $paged      Page number. Default 1.
  * }
- * @return WP_User[]
+ * @return WP_User_Query
  */
-function employee_dir_get_employees( array $args = [] ) {
+function employee_dir_get_employee_query( array $args = [] ) {
 	$settings = employee_dir_get_settings();
 
 	$args = wp_parse_args( $args, [
@@ -27,10 +32,11 @@ function employee_dir_get_employees( array $args = [] ) {
 	] );
 
 	$query_args = [
-		'number'  => absint( $args['per_page'] ),
-		'paged'   => absint( $args['paged'] ),
-		'orderby' => 'display_name',
-		'order'   => 'ASC',
+		'number'      => absint( $args['per_page'] ),
+		'paged'       => absint( $args['paged'] ),
+		'orderby'     => 'display_name',
+		'order'       => 'ASC',
+		'count_total' => true,
 	];
 
 	if ( ! empty( $settings['roles'] ) ) {
@@ -56,12 +62,96 @@ function employee_dir_get_employees( array $args = [] ) {
 	 * Filters the WP_User_Query arguments before the employee query runs.
 	 *
 	 * @param array $query_args Arguments passed to WP_User_Query.
-	 * @param array $args       Normalised args passed to employee_dir_get_employees().
+	 * @param array $args       Normalised args passed to employee_dir_get_employee_query().
 	 */
 	$query_args = apply_filters( 'employee_dir_query_args', $query_args, $args );
 
-	return ( new WP_User_Query( $query_args ) )->get_results();
+	return new WP_User_Query( $query_args );
 }
+
+/**
+ * Query employees and return an array of WP_User objects.
+ * Thin wrapper around employee_dir_get_employee_query() for callers that
+ * only need results, not the total count.
+ *
+ * @param array $args See employee_dir_get_employee_query() for accepted keys.
+ * @return WP_User[]
+ */
+function employee_dir_get_employees( array $args = [] ) {
+	return employee_dir_get_employee_query( $args )->get_results();
+}
+
+// ---------------------------------------------------------------------------
+// Pagination helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Generate pagination nav HTML.
+ *
+ * Renders Prev, numbered page buttons with ellipsis compression, and Next.
+ * Each button carries a data-page attribute; JS handles clicks via AJAX.
+ *
+ * @param int $total_pages
+ * @param int $current_page
+ * @return string HTML string (empty when there is only one page).
+ */
+function employee_dir_pagination_html( $total_pages, $current_page ) {
+	if ( $total_pages <= 1 ) {
+		return '';
+	}
+
+	$current_page = max( 1, min( $total_pages, (int) $current_page ) );
+
+	$html  = '<nav class="ed-pagination" id="ed-pagination" aria-label="' . esc_attr__( 'Directory pages', 'internal-staff-directory' ) . '">';
+
+	// Previous button.
+	$prev_disabled = ( 1 === $current_page ) ? ' disabled aria-disabled="true"' : '';
+	$html .= '<button type="button" class="ed-pagination__btn ed-pagination__prev"'
+		. $prev_disabled
+		. ' data-page="' . ( $current_page - 1 ) . '"'
+		. ' aria-label="' . esc_attr__( 'Previous page', 'internal-staff-directory' ) . '">'
+		. '&laquo;</button>';
+
+	// Numbered pages with ellipsis: always show first, last, current ±1.
+	$pages_to_show = [];
+	for ( $i = 1; $i <= $total_pages; $i++ ) {
+		if ( $i === 1 || $i === $total_pages || abs( $i - $current_page ) <= 1 ) {
+			$pages_to_show[] = $i;
+		}
+	}
+
+	$prev_shown = null;
+	foreach ( $pages_to_show as $page ) {
+		if ( null !== $prev_shown && $page - $prev_shown > 1 ) {
+			$html .= '<span class="ed-pagination__ellipsis" aria-hidden="true">&hellip;</span>';
+		}
+		$is_current  = ( $page === $current_page );
+		$aria_current = $is_current ? ' aria-current="page"' : '';
+		$html .= '<button type="button"'
+			. ' class="ed-pagination__btn' . ( $is_current ? ' is-current' : '' ) . '"'
+			. ' data-page="' . $page . '"'
+			. $aria_current . '>'
+			. $page
+			. '</button>';
+		$prev_shown = $page;
+	}
+
+	// Next button.
+	$next_disabled = ( $total_pages === $current_page ) ? ' disabled aria-disabled="true"' : '';
+	$html .= '<button type="button" class="ed-pagination__btn ed-pagination__next"'
+		. $next_disabled
+		. ' data-page="' . ( $current_page + 1 ) . '"'
+		. ' aria-label="' . esc_attr__( 'Next page', 'internal-staff-directory' ) . '">'
+		. '&raquo;</button>';
+
+	$html .= '</nav>';
+
+	return $html;
+}
+
+// ---------------------------------------------------------------------------
+// Shortcode
+// ---------------------------------------------------------------------------
 
 /**
  * [employee_directory] shortcode.
@@ -72,17 +162,31 @@ function employee_dir_get_employees( array $args = [] ) {
 function employee_dir_shortcode( $atts ) {
 	shortcode_atts( [], $atts, 'employee_directory' );
 
-	if ( employee_dir_get_settings()['require_login'] && ! is_user_logged_in() ) {
+	$settings = employee_dir_get_settings();
+
+	if ( $settings['require_login'] && ! is_user_logged_in() ) {
 		return '<p class="ed-no-results">' . esc_html__( 'You must be logged in to view the staff directory.', 'internal-staff-directory' ) . '</p>';
 	}
 
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended
 	$search     = isset( $_GET['ed_search'] ) ? sanitize_text_field( wp_unslash( $_GET['ed_search'] ) ) : '';
 	$department = isset( $_GET['ed_dept'] )   ? sanitize_text_field( wp_unslash( $_GET['ed_dept'] ) )   : '';
+	$paged      = isset( $_GET['ed_page'] )   ? max( 1, absint( $_GET['ed_page'] ) )                    : 1;
 	// phpcs:enable
 
-	$employees   = employee_dir_get_employees( compact( 'search', 'department' ) );
+	$query       = employee_dir_get_employee_query( compact( 'search', 'department', 'paged' ) );
+	$employees   = $query->get_results();
+	$total_pages = ( $settings['per_page'] > 0 )
+		? (int) ceil( $query->get_total() / $settings['per_page'] )
+		: 1;
 	$departments = employee_dir_get_departments();
+	$pagination  = employee_dir_pagination_html( $total_pages, $paged );
+
+	// Pass pagination state to JS so the first AJAX request knows the right page.
+	wp_localize_script( 'internal-staff-directory', 'employeeDirPage', [
+		'currentPage' => $paged,
+		'totalPages'  => $total_pages,
+	] );
 
 	ob_start();
 	include EMPLOYEE_DIR_PLUGIN_DIR . 'templates/directory.php';
@@ -90,23 +194,34 @@ function employee_dir_shortcode( $atts ) {
 }
 add_shortcode( 'employee_directory', 'employee_dir_shortcode' );
 
+// ---------------------------------------------------------------------------
+// AJAX handler
+// ---------------------------------------------------------------------------
+
 /**
- * AJAX handler: returns filtered employee card HTML.
- * Used by the JS search/filter UI for instant results without a page reload.
+ * AJAX handler: returns filtered employee card HTML + updated pagination.
+ * Used by the JS search/filter/pagination UI.
  */
 function employee_dir_ajax_search() {
 	check_ajax_referer( 'employee_dir_search', 'nonce' );
 
-	if ( employee_dir_get_settings()['require_login'] && ! is_user_logged_in() ) {
+	$settings = employee_dir_get_settings();
+
+	if ( $settings['require_login'] && ! is_user_logged_in() ) {
 		wp_send_json_error( [ 'message' => __( 'You must be logged in to view the staff directory.', 'internal-staff-directory' ) ] );
 	}
 
 	$search     = isset( $_POST['search'] )     ? sanitize_text_field( wp_unslash( $_POST['search'] ) )     : '';
 	$department = isset( $_POST['department'] ) ? sanitize_text_field( wp_unslash( $_POST['department'] ) ) : '';
+	$paged      = isset( $_POST['paged'] )      ? max( 1, absint( $_POST['paged'] ) )                       : 1;
 
-	$employees = employee_dir_get_employees( compact( 'search', 'department' ) );
+	$query       = employee_dir_get_employee_query( compact( 'search', 'department', 'paged' ) );
+	$employees   = $query->get_results();
+	$total_pages = ( $settings['per_page'] > 0 )
+		? (int) ceil( $query->get_total() / $settings['per_page'] )
+		: 1;
 
-	$visible_fields = employee_dir_get_settings()['visible_fields'];
+	$visible_fields = $settings['visible_fields'];
 
 	ob_start();
 	foreach ( $employees as $user ) {
@@ -119,18 +234,31 @@ function employee_dir_ajax_search() {
 		$html = '<p class="ed-no-results">' . esc_html__( 'No employees found.', 'internal-staff-directory' ) . '</p>';
 	}
 
-	wp_send_json_success( [ 'html' => $html ] );
+	wp_send_json_success( [
+		'html'        => $html,
+		'pagination'  => employee_dir_pagination_html( $total_pages, $paged ),
+		'totalPages'  => $total_pages,
+		'currentPage' => $paged,
+	] );
 }
 add_action( 'wp_ajax_employee_dir_search',        'employee_dir_ajax_search' );
 add_action( 'wp_ajax_nopriv_employee_dir_search', 'employee_dir_ajax_search' );
 
+// ---------------------------------------------------------------------------
+// Asset enqueueing
+// ---------------------------------------------------------------------------
+
 /**
- * Enqueue front-end assets only on pages that contain the shortcode.
+ * Enqueue front-end assets on pages that contain the shortcode or the
+ * individual profile page (ed_profile query var).
  */
 function employee_dir_enqueue_assets() {
 	global $post;
 
-	if ( ! is_a( $post, 'WP_Post' ) || ! has_shortcode( $post->post_content, 'employee_directory' ) ) {
+	$is_directory = is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'employee_directory' );
+	$is_profile   = (bool) get_query_var( 'ed_profile' );
+
+	if ( ! $is_directory && ! $is_profile ) {
 		return;
 	}
 

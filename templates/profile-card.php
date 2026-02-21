@@ -29,7 +29,11 @@ if ( '' === $full_name ) {
 	/>
 
 	<div class="ed-card__info">
-		<h3 class="ed-card__name"><?php echo esc_html( $full_name ); ?></h3>
+		<h3 class="ed-card__name">
+			<a href="<?php echo esc_url( employee_dir_get_profile_url( $user ) ); ?>">
+				<?php echo esc_html( $full_name ); ?>
+			</a>
+		</h3>
 
 		<?php if ( ! empty( $profile['job_title'] ) && in_array( 'job_title', $visible_fields, true ) ) : ?>
 			<p class="ed-card__title"><?php echo esc_html( $profile['job_title'] ); ?></p>

@@ -23,5 +23,10 @@ define( 'EMPLOYEE_DIR_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 
 require_once EMPLOYEE_DIR_PLUGIN_DIR . 'includes/profile.php';
 require_once EMPLOYEE_DIR_PLUGIN_DIR . 'includes/settings.php';
+require_once EMPLOYEE_DIR_PLUGIN_DIR . 'includes/profile-page.php';
 require_once EMPLOYEE_DIR_PLUGIN_DIR . 'includes/directory.php';
 require_once EMPLOYEE_DIR_PLUGIN_DIR . 'includes/admin.php';
+
+// Flush rewrite rules on activation/deactivation so the /staff/ rule takes effect.
+register_activation_hook( EMPLOYEE_DIR_PLUGIN_FILE, 'flush_rewrite_rules' );
+register_deactivation_hook( EMPLOYEE_DIR_PLUGIN_FILE, 'flush_rewrite_rules' );

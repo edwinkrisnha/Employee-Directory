@@ -7,6 +7,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Individual profile page** — each employee name on a card links to `/staff/{username}` via a custom WP rewrite rule. The profile page renders inside the active theme's header/footer and shows all fields unconditionally (ignores visible_fields setting).
+- **AJAX pagination** — numbered page navigation below the results grid; clicking a page number fetches results without a page reload. Driven by the existing `paged` arg in `WP_User_Query`. Search or filter resets to page 1 automatically.
+- **List/grid view toggle** — a button in the filter bar switches between the card grid and a compact single-column list; preference persists in `localStorage`.
+- `employee_dir_get_employee_query()` — new public function that returns the full `WP_User_Query` object (with `count_total => true`) for callers that need both results and total count.
+- `employee_dir_get_profile_url( WP_User $user )` — returns the canonical `/staff/{user_nicename}/` URL for a given user.
+- `employee_dir_pagination_html( $total_pages, $current_page )` — generates accessible pagination nav HTML with ellipsis compression; used by both the shortcode and the AJAX handler.
+- `register_activation_hook` / `register_deactivation_hook` flush rewrite rules so the `/staff/` URL works immediately after activation.
+
+### Changed
+- `employee_dir_get_employees()` is now a thin wrapper around `employee_dir_get_employee_query()->get_results()` — no breaking change for existing callers.
+- AJAX handler now returns `pagination` HTML alongside `html` in the JSON response.
 - Settings page under **Settings → Internal Staff Directory** with four configurable options:
   - **Results per page** — replaces the hardcoded limit of 200 (range: 1–500)
   - **User roles to include** — filter which WordPress roles appear in the directory; empty = all roles

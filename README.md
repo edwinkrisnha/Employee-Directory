@@ -6,12 +6,15 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 
 - **Searchable directory** – Search employees by name, email, or username
 - **Department filtering** – Instant filtering by department with no page reload
-- **AJAX-powered** – Debounced search and live filtering without full page refreshes
+- **AJAX-powered** – Debounced search, live filtering, and pagination without full page refreshes
 - **Extended user profiles** – Adds Department, Job Title, Phone, Office/Location, Bio, and Photo URL fields to WordPress user profiles
+- **Individual profile pages** – Each employee card links to `/staff/{username}` — a full profile page rendered inside the active theme
+- **AJAX pagination** – Numbered page navigation; search or filter resets to page 1 automatically
+- **List / grid view toggle** – Switch between card grid and compact list view; preference saved to `localStorage`
 - **Photo fallback** – Uses custom photo URLs or falls back to Gravatar automatically
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates
-- **Conditional asset loading** – CSS and JS only load on pages that use the shortcode
+- **Conditional asset loading** – CSS and JS only load on pages that use the shortcode or the profile page
 - **Admin settings page** – Configure results per page, visible card fields, included roles, and login requirement from **Settings → Internal Staff Directory**
 
 ## Requirements
@@ -97,11 +100,13 @@ internal-staff-directory/
 ├── includes/
 │   ├── profile.php           # User meta read/write (field definitions, getters, savers)
 │   ├── settings.php          # Admin settings page, Settings API registration, sanitizers
-│   ├── directory.php         # Shortcode, WP_User_Query logic, AJAX handler
+│   ├── profile-page.php      # Rewrite rule, template_redirect handler, profile URL helper
+│   ├── directory.php         # Shortcode, WP_User_Query logic, AJAX handler, pagination
 │   └── admin.php             # Admin profile field UI (render and save)
 ├── templates/
-│   ├── directory.php         # Shortcode output markup (search, filter, results wrapper)
-│   └── profile-card.php      # Individual employee card partial
+│   ├── directory.php         # Shortcode output markup (search, filter, results, pagination)
+│   ├── profile-card.php      # Individual employee card partial
+│   └── profile-page.php      # Full employee profile page template
 ├── assets/
 │   ├── directory.css         # Responsive card grid and component styles
 │   └── directory.js          # Debounced search, department filter, AJAX, DOM update

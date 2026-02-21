@@ -1,0 +1,97 @@
+<?php
+/**
+ * Full employee profile page template.
+ *
+ * Variables provided by employee_dir_profile_template_redirect():
+ *   @var WP_User $user
+ *   @var array   $profile  Keys: department, job_title, phone, office, bio, photo_url
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+$full_name = trim( $user->first_name . ' ' . $user->last_name );
+if ( '' === $full_name ) {
+	$full_name = $user->display_name;
+}
+
+$photo = ! empty( $profile['photo_url'] )
+	? esc_url( $profile['photo_url'] )
+	: get_avatar_url( $user->ID, [ 'size' => 128 ] );
+
+// Back link: referrer if it's on the same site, otherwise omit.
+$back_url  = '';
+$referrer  = wp_get_referer();
+if ( $referrer && str_starts_with( $referrer, home_url() ) ) {
+	$back_url = $referrer;
+}
+?>
+<main class="ed-profile-page" id="ed-profile-page">
+	<div class="ed-profile-page__inner">
+
+		<?php if ( $back_url ) : ?>
+			<p class="ed-profile-page__back">
+				<a href="<?php echo esc_url( $back_url ); ?>">
+					&larr; <?php esc_html_e( 'Back to directory', 'internal-staff-directory' ); ?>
+				</a>
+			</p>
+		<?php endif; ?>
+
+		<div class="ed-profile-page__header">
+			<img
+				class="ed-profile-page__photo"
+				src="<?php echo $photo; // Already escaped above. ?>"
+				alt="<?php echo esc_attr( $full_name ); ?>"
+				width="128"
+				height="128"
+			/>
+			<div class="ed-profile-page__headline">
+				<h1 class="ed-profile-page__name"><?php echo esc_html( $full_name ); ?></h1>
+
+				<?php if ( ! empty( $profile['job_title'] ) ) : ?>
+					<p class="ed-profile-page__title"><?php echo esc_html( $profile['job_title'] ); ?></p>
+				<?php endif; ?>
+
+				<?php if ( ! empty( $profile['department'] ) ) : ?>
+					<p class="ed-profile-page__dept"><?php echo esc_html( $profile['department'] ); ?></p>
+				<?php endif; ?>
+			</div>
+		</div>
+
+		<dl class="ed-profile-page__details">
+			<div class="ed-profile-page__detail-row">
+				<dt><?php esc_html_e( 'Email', 'internal-staff-directory' ); ?></dt>
+				<dd>
+					<a href="mailto:<?php echo esc_attr( $user->user_email ); ?>">
+						<?php echo esc_html( $user->user_email ); ?>
+					</a>
+				</dd>
+			</div>
+
+			<?php if ( ! empty( $profile['phone'] ) ) : ?>
+				<div class="ed-profile-page__detail-row">
+					<dt><?php esc_html_e( 'Phone', 'internal-staff-directory' ); ?></dt>
+					<dd>
+						<a href="tel:<?php echo esc_attr( preg_replace( '/[^\d+]/', '', $profile['phone'] ) ); ?>">
+							<?php echo esc_html( $profile['phone'] ); ?>
+						</a>
+					</dd>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $profile['office'] ) ) : ?>
+				<div class="ed-profile-page__detail-row">
+					<dt><?php esc_html_e( 'Office / Location', 'internal-staff-directory' ); ?></dt>
+					<dd><?php echo esc_html( $profile['office'] ); ?></dd>
+				</div>
+			<?php endif; ?>
+		</dl>
+
+		<?php if ( ! empty( $profile['bio'] ) ) : ?>
+			<div class="ed-profile-page__bio">
+				<h2><?php esc_html_e( 'About', 'internal-staff-directory' ); ?></h2>
+				<p><?php echo nl2br( esc_html( $profile['bio'] ) ); ?></p>
+			</div>
+		<?php endif; ?>
+
+	</div>
+</main>

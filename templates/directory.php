@@ -7,6 +7,9 @@
  *   @var string[]  $departments
  *   @var string    $search
  *   @var string    $department
+ *   @var int       $paged
+ *   @var int       $total_pages
+ *   @var string    $pagination      Pre-rendered pagination nav HTML.
  *   @var string[]  $visible_fields  Populated before the card loop from plugin settings.
  */
 
@@ -41,6 +44,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 					<?php endforeach; ?>
 				</select>
 			<?php endif; ?>
+
+			<button
+				type="button"
+				id="ed-view-toggle"
+				class="ed-view-toggle"
+				aria-pressed="false"
+				aria-label="<?php esc_attr_e( 'Switch to list view', 'internal-staff-directory' ); ?>"
+			><?php esc_html_e( 'List view', 'internal-staff-directory' ); ?></button>
 		</div>
 	</form>
 
@@ -56,5 +67,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			<p class="ed-no-results"><?php esc_html_e( 'No employees found.', 'internal-staff-directory' ); ?></p>
 		<?php endif; ?>
 	</div>
+
+	<?php
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- pagination HTML is generated internally.
+	echo $pagination;
+	?>
 
 </div>

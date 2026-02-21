@@ -171,6 +171,235 @@
 }
 
 /* --------------------------------------------------------------------------
+   View toggle button
+   -------------------------------------------------------------------------- */
+
+.ed-view-toggle {
+	padding: 0.5rem 0.875rem;
+	border: 1px solid #cbd5e1;
+	border-radius: 4px;
+	font-size: 0.875rem;
+	background: #fff;
+	cursor: pointer;
+	color: #475569;
+	white-space: nowrap;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.ed-view-toggle:hover {
+	border-color: #2563eb;
+	color: #2563eb;
+}
+
+.ed-view-toggle[aria-pressed="true"] {
+	background: #eff6ff;
+	border-color: #2563eb;
+	color: #2563eb;
+}
+
+/* --------------------------------------------------------------------------
+   List view
+   -------------------------------------------------------------------------- */
+
+.ed-results--list {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.ed-results--list .ed-card {
+	border-radius: 0;
+	border-left: none;
+	border-right: none;
+	border-top: none;
+	padding: 0.75rem 0;
+	align-items: center;
+}
+
+.ed-results--list .ed-card:first-child {
+	border-top: 1px solid #e2e8f0;
+}
+
+.ed-results--list .ed-card__photo {
+	width: 40px;
+	height: 40px;
+}
+
+.ed-results--list .ed-card__bio {
+	display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Pagination
+   -------------------------------------------------------------------------- */
+
+.ed-pagination {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 0.25rem;
+	flex-wrap: wrap;
+	margin-top: 1.5rem;
+}
+
+.ed-pagination__btn {
+	min-width: 2.25rem;
+	height: 2.25rem;
+	padding: 0 0.5rem;
+	border: 1px solid #cbd5e1;
+	border-radius: 4px;
+	background: #fff;
+	color: #475569;
+	font-size: 0.875rem;
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.ed-pagination__btn:hover:not(:disabled) {
+	border-color: #2563eb;
+	color: #2563eb;
+}
+
+.ed-pagination__btn.is-current {
+	background: #2563eb;
+	border-color: #2563eb;
+	color: #fff;
+	font-weight: 600;
+	cursor: default;
+}
+
+.ed-pagination__btn:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+}
+
+.ed-pagination__ellipsis {
+	display: flex;
+	align-items: center;
+	color: #94a3b8;
+	padding: 0 0.25rem;
+	font-size: 0.875rem;
+}
+
+/* --------------------------------------------------------------------------
+   Individual profile page
+   -------------------------------------------------------------------------- */
+
+.ed-profile-page__inner {
+	max-width: 720px;
+	margin: 2rem auto;
+	padding: 0 1rem;
+	font-family: inherit;
+}
+
+.ed-profile-page__back {
+	margin-bottom: 1.5rem;
+}
+
+.ed-profile-page__back a {
+	color: #2563eb;
+	text-decoration: none;
+	font-size: 0.875rem;
+}
+
+.ed-profile-page__back a:hover {
+	text-decoration: underline;
+}
+
+.ed-profile-page__header {
+	display: flex;
+	gap: 1.5rem;
+	align-items: flex-start;
+	margin-bottom: 1.5rem;
+}
+
+.ed-profile-page__photo {
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
+	width: 128px;
+	height: 128px;
+	background: #f1f5f9;
+}
+
+.ed-profile-page__headline {
+	min-width: 0;
+}
+
+.ed-profile-page__name {
+	margin: 0 0 0.25rem;
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.ed-profile-page__title {
+	margin: 0;
+	font-size: 1rem;
+	color: #475569;
+}
+
+.ed-profile-page__dept {
+	margin: 0.25rem 0 0;
+	font-size: 0.75rem;
+	color: #94a3b8;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	font-weight: 500;
+}
+
+.ed-profile-page__details {
+	margin: 0 0 1.5rem;
+	border-top: 1px solid #e2e8f0;
+}
+
+.ed-profile-page__detail-row {
+	display: flex;
+	gap: 1rem;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid #e2e8f0;
+}
+
+.ed-profile-page__detail-row dt {
+	width: 140px;
+	flex-shrink: 0;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: #64748b;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.ed-profile-page__detail-row dd {
+	margin: 0;
+	font-size: 0.9375rem;
+	color: #1e293b;
+}
+
+.ed-profile-page__detail-row a {
+	color: #2563eb;
+	text-decoration: none;
+}
+
+.ed-profile-page__detail-row a:hover {
+	text-decoration: underline;
+}
+
+.ed-profile-page__bio h2 {
+	font-size: 1rem;
+	font-weight: 600;
+	margin: 0 0 0.5rem;
+	color: #1e293b;
+}
+
+.ed-profile-page__bio p {
+	font-size: 0.9375rem;
+	color: #475569;
+	line-height: 1.6;
+	margin: 0;
+}
+
+/* --------------------------------------------------------------------------
    Accessibility
    -------------------------------------------------------------------------- */
 
