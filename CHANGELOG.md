@@ -14,11 +14,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Require login to view** — when enabled, guests see a login prompt instead of the directory
 - `employee_dir_get_settings()` helper centralises default-merging for all settings consumers
 - Employee cards now display **First name + Last name** (from WordPress core profile fields), falling back to `display_name` when either is blank
+- `employee_dir_query_args` filter — lets external code modify `WP_User_Query` arguments before the employee query runs
+- `employee_dir_settings_defaults` filter — lets external code override plugin setting defaults
+- `employee_dir_card_after` action — fires inside each card `<article>` after all built-in fields, enabling custom field injection
 
 ### Changed
 - `employee_dir_get_employees()` default `per_page` is now driven by the settings value instead of a hardcoded `200`
 - Role filter (`role__in`) applied to `WP_User_Query` when roles are configured in settings
 - AJAX handler respects the "require login" setting and returns `wp_send_json_error` for unauthenticated requests when the restriction is active
+- `$visible_fields` is now resolved once per render loop (in the parent template / AJAX handler) instead of once per card, removing repeated `get_option` calls inside the partial
+- `employee_dir_get_departments()` result is cached in a 1-hour transient; cache is invalidated automatically when any user's department field is saved
 
 ## [1.0.0] — 2026-02-21
 

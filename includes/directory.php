@@ -52,6 +52,14 @@ function employee_dir_get_employees( array $args = [] ) {
 		];
 	}
 
+	/**
+	 * Filters the WP_User_Query arguments before the employee query runs.
+	 *
+	 * @param array $query_args Arguments passed to WP_User_Query.
+	 * @param array $args       Normalised args passed to employee_dir_get_employees().
+	 */
+	$query_args = apply_filters( 'employee_dir_query_args', $query_args, $args );
+
 	return ( new WP_User_Query( $query_args ) )->get_results();
 }
 
@@ -97,6 +105,8 @@ function employee_dir_ajax_search() {
 	$department = isset( $_POST['department'] ) ? sanitize_text_field( wp_unslash( $_POST['department'] ) ) : '';
 
 	$employees = employee_dir_get_employees( compact( 'search', 'department' ) );
+
+	$visible_fields = employee_dir_get_settings()['visible_fields'];
 
 	ob_start();
 	foreach ( $employees as $user ) {

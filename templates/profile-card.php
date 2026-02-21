@@ -12,8 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 $photo          = ! empty( $profile['photo_url'] )
 	? esc_url( $profile['photo_url'] )
 	: get_avatar_url( $user->ID, [ 'size' => 96 ] );
-$visible_fields = employee_dir_get_settings()['visible_fields'];
-$full_name      = trim( $user->first_name . ' ' . $user->last_name );
+$full_name = trim( $user->first_name . ' ' . $user->last_name );
 if ( '' === $full_name ) {
 	$full_name = $user->display_name;
 }
@@ -62,5 +61,15 @@ if ( '' === $full_name ) {
 			<p class="ed-card__bio"><?php echo esc_html( $profile['bio'] ); ?></p>
 		<?php endif; ?>
 	</div>
+
+	<?php
+	/**
+	 * Fires after the employee card content, inside the <article> element.
+	 *
+	 * @param WP_User $user    The employee user object.
+	 * @param array   $profile The employee profile meta array.
+	 */
+	do_action( 'employee_dir_card_after', $user, $profile );
+	?>
 
 </article>

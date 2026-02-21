@@ -18,12 +18,22 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return array{per_page: int, roles: string[], visible_fields: string[], require_login: int}
  */
 function employee_dir_get_settings() {
-	$defaults = [
+	/**
+	 * Filters the default settings values.
+	 *
+	 * @param array $defaults {
+	 *   @type int      $per_page       Default results per page.
+	 *   @type string[] $roles          Default roles to include (empty = all).
+	 *   @type string[] $visible_fields Default visible card fields.
+	 *   @type int      $require_login  Default login requirement (0 or 1).
+	 * }
+	 */
+	$defaults = apply_filters( 'employee_dir_settings_defaults', [
 		'per_page'       => 200,
 		'roles'          => [],
 		'visible_fields' => [ 'department', 'job_title', 'phone', 'office', 'bio' ],
 		'require_login'  => 0,
-	];
+	] );
 
 	$saved = get_option( 'employee_dir_settings', [] );
 

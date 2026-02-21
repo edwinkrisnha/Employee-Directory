@@ -80,6 +80,14 @@ No custom database tables are created. All employee data is stored in the native
 | `edit_user_profile` | Renders profile fields on the admin user edit page |
 | `personal_options_update` | Saves fields when a user updates their own profile |
 | `edit_user_profile_update` | Saves fields when an admin updates a user profile |
+| `employee_dir_card_after` | Fires inside each card `<article>` after all built-in fields — use to inject custom content. Receives `WP_User $user, array $profile`. |
+
+### Filters
+
+| Hook | Description |
+|---|---|
+| `employee_dir_query_args` | Modify `WP_User_Query` arguments before the employee query runs. Receives `array $query_args, array $args`. |
+| `employee_dir_settings_defaults` | Override plugin setting defaults. Receives `array $defaults`. |
 
 ## File Structure
 

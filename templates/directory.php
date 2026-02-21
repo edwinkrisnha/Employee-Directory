@@ -7,6 +7,7 @@
  *   @var string[]  $departments
  *   @var string    $search
  *   @var string    $department
+ *   @var string[]  $visible_fields  Populated before the card loop from plugin settings.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -45,7 +46,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 	<div class="ed-results" id="ed-results" aria-live="polite" aria-atomic="true">
 		<?php if ( $employees ) : ?>
-			<?php foreach ( $employees as $user ) :
+			<?php
+			$visible_fields = employee_dir_get_settings()['visible_fields'];
+			foreach ( $employees as $user ) :
 				$profile = employee_dir_get_profile( $user->ID );
 				include __DIR__ . '/profile-card.php';
 			endforeach; ?>

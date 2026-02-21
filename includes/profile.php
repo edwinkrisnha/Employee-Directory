@@ -58,6 +58,12 @@ function employee_dir_save_profile( $user_id, array $data ) {
 			update_user_meta( $user_id, 'employee_dir_' . $field, $sanitizer( $data[ $field ] ) );
 		}
 	}
+
+	// Bust the departments cache whenever any profile is saved — department
+	// values may have been added, changed, or removed.
+	if ( array_key_exists( 'department', $data ) ) {
+		delete_transient( 'employee_dir_departments' );
+	}
 }
 
 /**
@@ -66,9 +72,14 @@ function employee_dir_save_profile( $user_id, array $data ) {
  * @return string[]
  */
 function employee_dir_get_departments() {
+	$cached = get_transient( 'employee_dir_departments' );
+	if ( false !== $cached ) {
+		return $cached;
+	}
+
 	global $wpdb;
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	$rows = $wpdb->get_col(
 		"SELECT DISTINCT meta_value
 		 FROM {$wpdb->usermeta}
@@ -77,5 +88,8 @@ function employee_dir_get_departments() {
 		 ORDER BY meta_value ASC"
 	);
 
-	return $rows ?: [];
+	$departments = $rows ?: [];
+	set_transient( 'employee_dir_departments', $departments, HOUR_IN_SECONDS );
+
+	return $departments;
 }
