@@ -9,29 +9,34 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-$photo = ! empty( $profile['photo_url'] )
+$photo          = ! empty( $profile['photo_url'] )
 	? esc_url( $profile['photo_url'] )
 	: get_avatar_url( $user->ID, [ 'size' => 96 ] );
+$visible_fields = employee_dir_get_settings()['visible_fields'];
+$full_name      = trim( $user->first_name . ' ' . $user->last_name );
+if ( '' === $full_name ) {
+	$full_name = $user->display_name;
+}
 ?>
-<article class="ed-card" aria-label="<?php echo esc_attr( $user->display_name ); ?>">
+<article class="ed-card" aria-label="<?php echo esc_attr( $full_name ); ?>">
 
 	<img
 		class="ed-card__photo"
 		src="<?php echo $photo; // Already escaped above. ?>"
-		alt="<?php echo esc_attr( $user->display_name ); ?>"
+		alt="<?php echo esc_attr( $full_name ); ?>"
 		width="96"
 		height="96"
 		loading="lazy"
 	/>
 
 	<div class="ed-card__info">
-		<h3 class="ed-card__name"><?php echo esc_html( $user->display_name ); ?></h3>
+		<h3 class="ed-card__name"><?php echo esc_html( $full_name ); ?></h3>
 
-		<?php if ( ! empty( $profile['job_title'] ) ) : ?>
+		<?php if ( ! empty( $profile['job_title'] ) && in_array( 'job_title', $visible_fields, true ) ) : ?>
 			<p class="ed-card__title"><?php echo esc_html( $profile['job_title'] ); ?></p>
 		<?php endif; ?>
 
-		<?php if ( ! empty( $profile['department'] ) ) : ?>
+		<?php if ( ! empty( $profile['department'] ) && in_array( 'department', $visible_fields, true ) ) : ?>
 			<p class="ed-card__dept"><?php echo esc_html( $profile['department'] ); ?></p>
 		<?php endif; ?>
 
@@ -41,7 +46,7 @@ $photo = ! empty( $profile['photo_url'] )
 			</a>
 		</p>
 
-		<?php if ( ! empty( $profile['phone'] ) ) : ?>
+		<?php if ( ! empty( $profile['phone'] ) && in_array( 'phone', $visible_fields, true ) ) : ?>
 			<p class="ed-card__phone">
 				<a href="tel:<?php echo esc_attr( preg_replace( '/[^\d+]/', '', $profile['phone'] ) ); ?>">
 					<?php echo esc_html( $profile['phone'] ); ?>
@@ -49,11 +54,11 @@ $photo = ! empty( $profile['photo_url'] )
 			</p>
 		<?php endif; ?>
 
-		<?php if ( ! empty( $profile['office'] ) ) : ?>
+		<?php if ( ! empty( $profile['office'] ) && in_array( 'office', $visible_fields, true ) ) : ?>
 			<p class="ed-card__office"><?php echo esc_html( $profile['office'] ); ?></p>
 		<?php endif; ?>
 
-		<?php if ( ! empty( $profile['bio'] ) ) : ?>
+		<?php if ( ! empty( $profile['bio'] ) && in_array( 'bio', $visible_fields, true ) ) : ?>
 			<p class="ed-card__bio"><?php echo esc_html( $profile['bio'] ); ?></p>
 		<?php endif; ?>
 	</div>

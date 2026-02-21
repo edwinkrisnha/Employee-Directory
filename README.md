@@ -12,6 +12,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates
 - **Conditional asset loading** – CSS and JS only load on pages that use the shortcode
+- **Admin settings page** – Configure results per page, visible card fields, included roles, and login requirement from **Settings → Internal Staff Directory**
 
 ## Requirements
 
@@ -36,6 +37,17 @@ Place the directory on any page or post:
 ```
 
 No attributes are required. The shortcode renders the full searchable directory with department filter.
+
+### Settings
+
+Go to **Settings → Internal Staff Directory** to configure:
+
+| Setting | Default | Description |
+|---|---|---|
+| Results per page | 200 | Maximum employees shown (1–500) |
+| User roles to include | All roles | Restrict the directory to specific WordPress roles |
+| Visible card fields | All fields | Show or hide Department, Job Title, Phone, Office/Location, Bio |
+| Require login to view | Off | When on, guests see a login prompt instead of the directory |
 
 ### Profile Fields
 
@@ -76,6 +88,7 @@ internal-staff-directory/
 ├── internal-staff-directory.php    # Main plugin file — registers hooks and loads includes
 ├── includes/
 │   ├── profile.php           # User meta read/write (field definitions, getters, savers)
+│   ├── settings.php          # Admin settings page, Settings API registration, sanitizers
 │   ├── directory.php         # Shortcode, WP_User_Query logic, AJAX handler
 │   └── admin.php             # Admin profile field UI (render and save)
 ├── templates/

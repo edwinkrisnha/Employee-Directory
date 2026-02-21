@@ -17,10 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @return WP_User[]
  */
 function employee_dir_get_employees( array $args = [] ) {
+	$settings = employee_dir_get_settings();
+
 	$args = wp_parse_args( $args, [
 		'search'     => '',
 		'department' => '',
-		'per_page'   => 200,
+		'per_page'   => $settings['per_page'],
 		'paged'      => 1,
 	] );
 
@@ -30,6 +32,10 @@ function employee_dir_get_employees( array $args = [] ) {
 		'orderby' => 'display_name',
 		'order'   => 'ASC',
 	];
+
+	if ( ! empty( $settings['roles'] ) ) {
+		$query_args['role__in'] = $settings['roles'];
+	}
 
 	if ( ! empty( $args['search'] ) ) {
 		$query_args['search']         = '*' . sanitize_text_field( $args['search'] ) . '*';
@@ -58,6 +64,10 @@ function employee_dir_get_employees( array $args = [] ) {
 function employee_dir_shortcode( $atts ) {
 	shortcode_atts( [], $atts, 'employee_directory' );
 
+	if ( employee_dir_get_settings()['require_login'] && ! is_user_logged_in() ) {
+		return '<p class="ed-no-results">' . esc_html__( 'You must be logged in to view the staff directory.', 'internal-staff-directory' ) . '</p>';
+	}
+
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended
 	$search     = isset( $_GET['ed_search'] ) ? sanitize_text_field( wp_unslash( $_GET['ed_search'] ) ) : '';
 	$department = isset( $_GET['ed_dept'] )   ? sanitize_text_field( wp_unslash( $_GET['ed_dept'] ) )   : '';
@@ -78,6 +88,10 @@ add_shortcode( 'employee_directory', 'employee_dir_shortcode' );
  */
 function employee_dir_ajax_search() {
 	check_ajax_referer( 'employee_dir_search', 'nonce' );
+
+	if ( employee_dir_get_settings()['require_login'] && ! is_user_logged_in() ) {
+		wp_send_json_error( [ 'message' => __( 'You must be logged in to view the staff directory.', 'internal-staff-directory' ) ] );
+	}
 
 	$search     = isset( $_POST['search'] )     ? sanitize_text_field( wp_unslash( $_POST['search'] ) )     : '';
 	$department = isset( $_POST['department'] ) ? sanitize_text_field( wp_unslash( $_POST['department'] ) ) : '';
