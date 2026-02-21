@@ -1,11 +1,17 @@
 <?php
 /**
- * Plugin Name: Employee Directory
- * Description: Internal employee directory for company intranet. Searchable staff profiles stored as user meta.
- * Version:     1.0.0
- * Author:      Your Company
- * License:     GPL-2.0-or-later
- * Text Domain: employee-directory
+ * Plugin Name:       Employee Directory
+ * Plugin URI:        https://github.com/edwinkrisnha/Employee-Directory
+ * Description:       Internal employee directory for company intranet. Searchable staff profiles stored as user meta.
+ * Version:           1.0.0
+ * Author:            Edwin Krisnha
+ * Author URI:        https://github.com/edwinkrisnha
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       employee-directory
+ * Requires at least: 5.6
+ * Requires PHP:      7.4
+ * Tested up to:      6.7
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
