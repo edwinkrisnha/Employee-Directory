@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Employee Directory
+ * Plugin Name:       Internal Staff Directory
  * Plugin URI:        https://github.com/edwinkrisnha/Employee-Directory
  * Description:       Internal employee directory for company intranet. Searchable staff profiles stored as user meta.
  * Version:           1.0.0
@@ -8,7 +8,7 @@
  * Author URI:        https://github.com/edwinkrisnha
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       employee-directory
+ * Text Domain:       internal-staff-directory
  * Requires at least: 5.6
  * Requires PHP:      7.4
  * Tested up to:      6.7

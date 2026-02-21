@@ -11,28 +11,28 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
-<div class="employee-directory" id="employee-directory">
+<div class="internal-staff-directory" id="internal-staff-directory">
 
-	<form class="ed-filters" id="ed-filter-form" method="get" role="search" aria-label="<?php esc_attr_e( 'Search employees', 'employee-directory' ); ?>">
+	<form class="ed-filters" id="ed-filter-form" method="get" role="search" aria-label="<?php esc_attr_e( 'Search employees', 'internal-staff-directory' ); ?>">
 		<div class="ed-filter-row">
 			<label for="ed-search" class="screen-reader-text">
-				<?php esc_html_e( 'Search employees', 'employee-directory' ); ?>
+				<?php esc_html_e( 'Search employees', 'internal-staff-directory' ); ?>
 			</label>
 			<input
 				type="search"
 				id="ed-search"
 				name="ed_search"
-				placeholder="<?php esc_attr_e( 'Search by name or email\xe2\x80\xa6', 'employee-directory' ); ?>"
+				placeholder="<?php esc_attr_e( 'Search by name or email\xe2\x80\xa6', 'internal-staff-directory' ); ?>"
 				value="<?php echo esc_attr( $search ); ?>"
 				autocomplete="off"
 			/>
 
 			<?php if ( $departments ) : ?>
 				<label for="ed-department" class="screen-reader-text">
-					<?php esc_html_e( 'Filter by department', 'employee-directory' ); ?>
+					<?php esc_html_e( 'Filter by department', 'internal-staff-directory' ); ?>
 				</label>
 				<select id="ed-department" name="ed_dept">
-					<option value=""><?php esc_html_e( 'All departments', 'employee-directory' ); ?></option>
+					<option value=""><?php esc_html_e( 'All departments', 'internal-staff-directory' ); ?></option>
 					<?php foreach ( $departments as $dept ) : ?>
 						<option value="<?php echo esc_attr( $dept ); ?>" <?php selected( $department, $dept ); ?>>
 							<?php echo esc_html( $dept ); ?>
@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				include __DIR__ . '/profile-card.php';
 			endforeach; ?>
 		<?php else : ?>
-			<p class="ed-no-results"><?php esc_html_e( 'No employees found.', 'employee-directory' ); ?></p>
+			<p class="ed-no-results"><?php esc_html_e( 'No employees found.', 'internal-staff-directory' ); ?></p>
 		<?php endif; ?>
 	</div>
 

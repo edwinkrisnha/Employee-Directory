@@ -92,7 +92,7 @@ function employee_dir_ajax_search() {
 	$html = ob_get_clean();
 
 	if ( empty( trim( $html ) ) ) {
-		$html = '<p class="ed-no-results">' . esc_html__( 'No employees found.', 'employee-directory' ) . '</p>';
+		$html = '<p class="ed-no-results">' . esc_html__( 'No employees found.', 'internal-staff-directory' ) . '</p>';
 	}
 
 	wp_send_json_success( [ 'html' => $html ] );
@@ -111,21 +111,21 @@ function employee_dir_enqueue_assets() {
 	}
 
 	wp_enqueue_style(
-		'employee-directory',
+		'internal-staff-directory',
 		EMPLOYEE_DIR_PLUGIN_URL . 'assets/directory.css',
 		[],
 		EMPLOYEE_DIR_VERSION
 	);
 
 	wp_enqueue_script(
-		'employee-directory',
+		'internal-staff-directory',
 		EMPLOYEE_DIR_PLUGIN_URL . 'assets/directory.js',
 		[ 'jquery' ],
 		EMPLOYEE_DIR_VERSION,
 		true
 	);
 
-	wp_localize_script( 'employee-directory', 'employeeDir', [
+	wp_localize_script( 'internal-staff-directory', 'employeeDir', [
 		'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 		'nonce'   => wp_create_nonce( 'employee_dir_search' ),
 		'action'  => 'employee_dir_search',

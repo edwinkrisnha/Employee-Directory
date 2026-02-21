@@ -1,4 +1,4 @@
-# Employee Directory
+# Internal Staff Directory
 
 A lightweight WordPress plugin for internal staff directories. Provides a searchable, filterable employee directory with AJAX-powered search, department filtering, and extended user profile fields.
 
@@ -21,7 +21,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 
 ## Installation
 
-1. Upload the `employee-directory` folder to `/wp-content/plugins/`
+1. Upload the `internal-staff-directory` folder to `/wp-content/plugins/`
 2. Activate the plugin through **Plugins** in the WordPress admin
 3. Add the shortcode to any page or post
 
@@ -72,8 +72,8 @@ No custom database tables are created. All employee data is stored in the native
 ## File Structure
 
 ```
-employee-directory/
-├── employee-directory.php    # Main plugin file — registers hooks and loads includes
+internal-staff-directory/
+├── internal-staff-directory.php    # Main plugin file — registers hooks and loads includes
 ├── includes/
 │   ├── profile.php           # User meta read/write (field definitions, getters, savers)
 │   ├── directory.php         # Shortcode, WP_User_Query logic, AJAX handler

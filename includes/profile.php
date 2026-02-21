@@ -13,12 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 function employee_dir_fields() {
 	return [
-		'department' => __( 'Department', 'employee-directory' ),
-		'job_title'  => __( 'Job Title', 'employee-directory' ),
-		'phone'      => __( 'Phone', 'employee-directory' ),
-		'office'     => __( 'Office / Location', 'employee-directory' ),
-		'bio'        => __( 'Bio', 'employee-directory' ),
-		'photo_url'  => __( 'Profile Photo URL', 'employee-directory' ),
+		'department' => __( 'Department', 'internal-staff-directory' ),
+		'job_title'  => __( 'Job Title', 'internal-staff-directory' ),
+		'phone'      => __( 'Phone', 'internal-staff-directory' ),
+		'office'     => __( 'Office / Location', 'internal-staff-directory' ),
+		'bio'        => __( 'Bio', 'internal-staff-directory' ),
+		'photo_url'  => __( 'Profile Photo URL', 'internal-staff-directory' ),
 	];
 }
 

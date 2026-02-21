@@ -18,7 +18,7 @@ function employee_dir_show_extra_profile_fields( $user ) {
 	$profile = employee_dir_get_profile( $user->ID );
 	$fields  = employee_dir_fields();
 	?>
-	<h2><?php esc_html_e( 'Employee Directory', 'employee-directory' ); ?></h2>
+	<h2><?php esc_html_e( 'Employee Directory', 'internal-staff-directory' ); ?></h2>
 	<table class="form-table" role="presentation">
 		<?php foreach ( $fields as $key => $label ) : ?>
 		<tr>
@@ -45,7 +45,7 @@ function employee_dir_show_extra_profile_fields( $user ) {
 						placeholder="https://"
 					/>
 					<p class="description">
-						<?php esc_html_e( 'Direct URL to profile photo. Leave blank to use Gravatar.', 'employee-directory' ); ?>
+						<?php esc_html_e( 'Direct URL to profile photo. Leave blank to use Gravatar.', 'internal-staff-directory' ); ?>
 					</p>
 				<?php else : ?>
 					<input
