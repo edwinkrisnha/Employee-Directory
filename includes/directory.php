@@ -14,10 +14,13 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Use this when you need both results and total count (e.g. for pagination).
  *
  * @param array $args {
- *   @type string $search     Search term matched against name and email.
- *   @type string $department Filter by exact department value.
- *   @type int    $per_page   Number of results. Default: value from plugin settings.
- *   @type int    $paged      Page number. Default 1.
+ *   @type string   $search     Search term matched against name and email.
+ *   @type string   $department Filter by exact department value.
+ *   @type int      $per_page   Number of results. Default: value from plugin settings.
+ *   @type int      $paged      Page number. Default 1.
+ *   @type string   $sort       Sort key: name_asc|name_desc|start_date_desc|department_asc. Default 'name_asc'.
+ *   @type string   $letter     First letter of display_name to filter by (A–Z). Overrides $search.
+ *   @type string[] $role__in   Limit to specific roles; intersects with settings roles when both are set.
  * }
  * @return WP_User_Query
  */
@@ -29,21 +32,49 @@ function employee_dir_get_employee_query( array $args = [] ) {
 		'department' => '',
 		'per_page'   => $settings['per_page'],
 		'paged'      => 1,
+		'sort'       => 'name_asc',
+		'letter'     => '',
+		'role__in'   => [],
 	] );
 
-	$query_args = [
-		'number'      => absint( $args['per_page'] ),
-		'paged'       => absint( $args['paged'] ),
-		'orderby'     => 'display_name',
-		'order'       => 'ASC',
-		'count_total' => true,
+	// Resolve sort to WP_User_Query orderby/order/meta_key args.
+	$sort_map = [
+		'name_asc'        => [ 'orderby' => 'display_name', 'order' => 'ASC' ],
+		'name_desc'       => [ 'orderby' => 'display_name', 'order' => 'DESC' ],
+		'start_date_desc' => [ 'orderby' => 'meta_value',   'order' => 'DESC', 'meta_key' => 'employee_dir_start_date' ], // phpcs:ignore WordPress.DB.SlowDBQuery
+		'department_asc'  => [ 'orderby' => 'meta_value',   'order' => 'ASC',  'meta_key' => 'employee_dir_department' ],  // phpcs:ignore WordPress.DB.SlowDBQuery
 	];
+	$sort_args = $sort_map[ $args['sort'] ] ?? $sort_map['name_asc'];
 
-	if ( ! empty( $settings['roles'] ) ) {
-		$query_args['role__in'] = $settings['roles'];
+	$query_args = array_merge(
+		[
+			'number'      => absint( $args['per_page'] ),
+			'paged'       => absint( $args['paged'] ),
+			'count_total' => true,
+		],
+		$sort_args
+	);
+
+	// Role filter: settings roles are the base; shortcode role__in narrows further.
+	$settings_roles = ! empty( $settings['roles'] ) ? $settings['roles'] : [];
+	$arg_roles      = array_filter( array_map( 'sanitize_key', (array) $args['role__in'] ) );
+	if ( $arg_roles ) {
+		$effective_roles = $settings_roles ? array_values( array_intersect( $settings_roles, $arg_roles ) ) : $arg_roles;
+	} else {
+		$effective_roles = $settings_roles;
+	}
+	if ( ! empty( $effective_roles ) ) {
+		$query_args['role__in'] = $effective_roles;
 	}
 
-	if ( ! empty( $args['search'] ) ) {
+	// Letter filter takes priority over text search (mutual exclusion).
+	if ( ! empty( $args['letter'] ) ) {
+		$letter = strtoupper( substr( sanitize_text_field( $args['letter'] ), 0, 1 ) );
+		if ( ctype_alpha( $letter ) ) {
+			$query_args['search']         = $letter . '*';
+			$query_args['search_columns'] = [ 'display_name' ];
+		}
+	} elseif ( ! empty( $args['search'] ) ) {
 		$query_args['search']         = '*' . sanitize_text_field( $args['search'] ) . '*';
 		$query_args['search_columns'] = [ 'display_name', 'user_email', 'user_login' ];
 	}
@@ -160,7 +191,15 @@ function employee_dir_pagination_html( $total_pages, $current_page ) {
  * @return string HTML output.
  */
 function employee_dir_shortcode( $atts ) {
-	shortcode_atts( [], $atts, 'employee_directory' );
+	$atts = shortcode_atts( [
+		'department' => '',
+		'per_page'   => 0,   // 0 = use plugin settings default
+		'role'       => '',
+	], $atts, 'employee_directory' );
+
+	$locked_department = sanitize_text_field( $atts['department'] );
+	$locked_per_page   = absint( $atts['per_page'] );
+	$locked_role       = sanitize_text_field( $atts['role'] );
 
 	$settings = employee_dir_get_settings();
 
@@ -169,15 +208,26 @@ function employee_dir_shortcode( $atts ) {
 	}
 
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended
-	$search     = isset( $_GET['ed_search'] ) ? sanitize_text_field( wp_unslash( $_GET['ed_search'] ) ) : '';
-	$department = isset( $_GET['ed_dept'] )   ? sanitize_text_field( wp_unslash( $_GET['ed_dept'] ) )   : '';
-	$paged      = isset( $_GET['ed_page'] )   ? max( 1, absint( $_GET['ed_page'] ) )                    : 1;
+	$search = isset( $_GET['ed_search'] ) ? sanitize_text_field( wp_unslash( $_GET['ed_search'] ) ) : '';
+	// If a department is locked via shortcode attribute, ignore the URL param.
+	$department = $locked_department ?: ( isset( $_GET['ed_dept'] ) ? sanitize_text_field( wp_unslash( $_GET['ed_dept'] ) ) : '' );
+	$paged      = isset( $_GET['ed_page'] ) ? max( 1, absint( $_GET['ed_page'] ) ) : 1;
 	// phpcs:enable
 
-	$query       = employee_dir_get_employee_query( compact( 'search', 'department', 'paged' ) );
+	$query_args = compact( 'search', 'department', 'paged' );
+	if ( $locked_per_page > 0 ) {
+		$query_args['per_page'] = $locked_per_page;
+	}
+	if ( '' !== $locked_role ) {
+		$query_args['role__in'] = [ $locked_role ];
+	}
+
+	$query    = employee_dir_get_employee_query( $query_args );
+	$per_page = $locked_per_page > 0 ? $locked_per_page : $settings['per_page'];
+
 	$employees   = $query->get_results();
-	$total_pages = ( $settings['per_page'] > 0 )
-		? (int) ceil( $query->get_total() / $settings['per_page'] )
+	$total_pages = ( $per_page > 0 )
+		? (int) ceil( $query->get_total() / $per_page )
 		: 1;
 	$departments = employee_dir_get_departments();
 	$pagination  = employee_dir_pagination_html( $total_pages, $paged );
@@ -186,6 +236,13 @@ function employee_dir_shortcode( $atts ) {
 	wp_localize_script( 'internal-staff-directory', 'employeeDirPage', [
 		'currentPage' => $paged,
 		'totalPages'  => $total_pages,
+	] );
+
+	// Pass locked shortcode constraints so JS always sends them with every AJAX request.
+	wp_localize_script( 'internal-staff-directory', 'employeeDirLocked', [
+		'department' => $locked_department,
+		'perPage'    => $locked_per_page,
+		'role'       => $locked_role,
 	] );
 
 	ob_start();
@@ -214,11 +271,24 @@ function employee_dir_ajax_search() {
 	$search     = isset( $_POST['search'] )     ? sanitize_text_field( wp_unslash( $_POST['search'] ) )     : '';
 	$department = isset( $_POST['department'] ) ? sanitize_text_field( wp_unslash( $_POST['department'] ) ) : '';
 	$paged      = isset( $_POST['paged'] )      ? max( 1, absint( $_POST['paged'] ) )                       : 1;
+	$sort       = isset( $_POST['sort'] )       ? sanitize_key( wp_unslash( $_POST['sort'] ) )               : 'name_asc';
+	$letter     = isset( $_POST['letter'] )     ? sanitize_text_field( wp_unslash( $_POST['letter'] ) )     : '';
+	$role__in   = ( isset( $_POST['role'] ) && '' !== $_POST['role'] )
+		? [ sanitize_key( wp_unslash( $_POST['role'] ) ) ]
+		: [];
 
-	$query       = employee_dir_get_employee_query( compact( 'search', 'department', 'paged' ) );
+	$per_page = absint( isset( $_POST['per_page'] ) ? $_POST['per_page'] : 0 ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+	$query_args = compact( 'search', 'department', 'paged', 'sort', 'letter', 'role__in' );
+	if ( $per_page > 0 ) {
+		$query_args['per_page'] = $per_page;
+	}
+
+	$query       = employee_dir_get_employee_query( $query_args );
 	$employees   = $query->get_results();
-	$total_pages = ( $settings['per_page'] > 0 )
-		? (int) ceil( $query->get_total() / $settings['per_page'] )
+	$effective_per_page = $per_page > 0 ? $per_page : $settings['per_page'];
+	$total_pages = ( $effective_per_page > 0 )
+		? (int) ceil( $query->get_total() / $effective_per_page )
 		: 1;
 
 	$visible_fields = $settings['visible_fields'];

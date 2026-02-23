@@ -37,6 +37,7 @@ function employee_dir_get_settings() {
 		'dept_colors'      => 1,
 		'message_platform' => 'none',
 		'dicebear_style'   => 'big-smile',
+		'new_hire_days'    => 90,
 	] );
 
 	$saved = get_option( 'employee_dir_settings', [] );
@@ -146,6 +147,14 @@ function employee_dir_register_settings() {
 		'employee-dir-settings',
 		'employee_dir_main'
 	);
+
+	add_settings_field(
+		'employee_dir_new_hire_days',
+		__( '"New" badge window', 'internal-staff-directory' ),
+		'employee_dir_field_new_hire_days',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
 }
 add_action( 'admin_init', 'employee_dir_register_settings' );
 
@@ -220,6 +229,11 @@ function employee_dir_sanitize_settings( $input ) {
 	$output['dicebear_style'] = ( isset( $input['dicebear_style'] ) && in_array( $input['dicebear_style'], $valid_dicebear_styles, true ) )
 		? $input['dicebear_style']
 		: 'big-smile';
+
+	// new_hire_days: integer 0–365 (0 = feature disabled)
+	if ( isset( $input['new_hire_days'] ) ) {
+		$output['new_hire_days'] = min( 365, absint( $input['new_hire_days'] ) );
+	}
 
 	return $output;
 }
@@ -472,6 +486,27 @@ function employee_dir_field_dicebear_style() {
 			'<a href="https://www.dicebear.com/styles/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Preview all styles', 'internal-staff-directory' ) . '</a>'
 		);
 		?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the '"New" badge window' number input.
+ */
+function employee_dir_field_new_hire_days() {
+	$settings = employee_dir_get_settings();
+	?>
+	<input
+		type="number"
+		id="employee_dir_new_hire_days"
+		name="employee_dir_settings[new_hire_days]"
+		value="<?php echo esc_attr( $settings['new_hire_days'] ); ?>"
+		min="0"
+		max="365"
+		class="small-text"
+	/>
+	<p class="description">
+		<?php esc_html_e( 'Employees who joined within this many days get a "New" badge on their card. Set to 0 to disable.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }

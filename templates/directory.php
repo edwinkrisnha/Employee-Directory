@@ -9,8 +9,8 @@
  *   @var string    $department
  *   @var int       $paged
  *   @var int       $total_pages
- *   @var string    $pagination      Pre-rendered pagination nav HTML.
- *   @var string[]  $visible_fields  Populated before the card loop from plugin settings.
+ *   @var string    $pagination         Pre-rendered pagination nav HTML.
+ *   @var string    $locked_department  Non-empty when the shortcode locked a dept.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -26,12 +26,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				type="search"
 				id="ed-search"
 				name="ed_search"
-				placeholder="<?php esc_attr_e( 'Search by name or email\xe2\x80\xa6', 'internal-staff-directory' ); ?>"
+				placeholder="<?php esc_attr_e( 'Search by name or email…', 'internal-staff-directory' ); ?>"
 				value="<?php echo esc_attr( $search ); ?>"
 				autocomplete="off"
 			/>
 
-			<?php if ( $departments ) : ?>
+			<?php if ( $departments && empty( $locked_department ) ) : ?>
 				<label for="ed-department" class="screen-reader-text">
 					<?php esc_html_e( 'Filter by department', 'internal-staff-directory' ); ?>
 				</label>
@@ -44,6 +44,16 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 					<?php endforeach; ?>
 				</select>
 			<?php endif; ?>
+
+			<label for="ed-sort" class="screen-reader-text">
+				<?php esc_html_e( 'Sort by', 'internal-staff-directory' ); ?>
+			</label>
+			<select id="ed-sort" name="ed_sort">
+				<option value="name_asc"><?php esc_html_e( 'A → Z', 'internal-staff-directory' ); ?></option>
+				<option value="name_desc"><?php esc_html_e( 'Z → A', 'internal-staff-directory' ); ?></option>
+				<option value="start_date_desc"><?php esc_html_e( 'Newest join date', 'internal-staff-directory' ); ?></option>
+				<option value="department_asc"><?php esc_html_e( 'Department', 'internal-staff-directory' ); ?></option>
+			</select>
 
 			<button
 				type="button"
@@ -62,6 +72,17 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			><?php esc_html_e( 'Vertical view', 'internal-staff-directory' ); ?></button>
 		</div>
 	</form>
+
+	<nav class="ed-az-nav" id="ed-az-nav" aria-label="<?php esc_attr_e( 'Jump to letter', 'internal-staff-directory' ); ?>">
+		<?php foreach ( range( 'A', 'Z' ) as $az_letter ) : ?>
+			<button type="button" class="ed-az-nav__btn" data-letter="<?php echo esc_attr( $az_letter ); ?>">
+				<?php echo esc_html( $az_letter ); ?>
+			</button>
+		<?php endforeach; ?>
+		<button type="button" class="ed-az-nav__btn ed-az-nav__all" data-letter="">
+			<?php esc_html_e( 'All', 'internal-staff-directory' ); ?>
+		</button>
+	</nav>
 
 	<div class="ed-results" id="ed-results" aria-live="polite" aria-atomic="true">
 		<?php if ( $employees ) : ?>

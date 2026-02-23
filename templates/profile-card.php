@@ -28,6 +28,19 @@ $photo = ! empty( $profile['photo_url'] )
 	: esc_url( 'https://api.dicebear.com/9.x/' . $settings['dicebear_style'] . '/svg?seed=' . rawurlencode( $full_name ) );
 
 $article_style = $dept_color ? ' style="--ed-dept-color:' . esc_attr( $dept_color ) . ';"' : '';
+
+$is_new_hire   = false;
+$new_hire_days = absint( $settings['new_hire_days'] );
+if ( $new_hire_days > 0 && ! empty( $profile['start_date'] ) ) {
+	$raw_date = $profile['start_date'];
+	if ( preg_match( '/^\d{4}-\d{2}$/', $raw_date ) ) {
+		$raw_date .= '-01';
+	}
+	try {
+		$days_since  = ( new DateTime( $raw_date ) )->diff( new DateTime( 'today' ) )->days;
+		$is_new_hire = ( $days_since <= $new_hire_days );
+	} catch ( Exception $e ) {} // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+}
 ?>
 <article class="ed-card" aria-label="<?php echo esc_attr( $full_name ); ?>"<?php echo $article_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr above. ?>>
 
@@ -47,6 +60,11 @@ $article_style = $dept_color ? ' style="--ed-dept-color:' . esc_attr( $dept_colo
 			<a href="<?php echo esc_url( $profile_url ); ?>">
 				<?php echo esc_html( $full_name ); ?>
 			</a>
+			<?php if ( $is_new_hire ) : ?>
+				<span class="ed-card__new-badge" aria-label="<?php esc_attr_e( 'New hire', 'internal-staff-directory' ); ?>">
+					<?php esc_html_e( 'New', 'internal-staff-directory' ); ?>
+				</span>
+			<?php endif; ?>
 		</h3>
 
 		<?php if ( ! empty( $profile['job_title'] ) && in_array( 'job_title', $visible_fields, true ) ) : ?>

@@ -7,6 +7,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **"New" hire badge** — employees whose start date is within a configurable window (default: 90 days) get a small green "New" chip next to their name on the card. Window is set in **Settings → Internal Staff Directory → "New" badge window** (0–365 days; 0 disables the badge).
+- **Shortcode attributes** — `[employee_directory]` now accepts `department`, `per_page`, and `role` attributes. Example: `[employee_directory department="Engineering" per_page="10" role="editor"]`. When `department` is locked via the shortcode, the department dropdown is hidden from visitors and the AJAX search always respects the locked value.
+- **Sort dropdown** — filter bar now includes an A → Z / Z → A / Newest join date / Department sort selector. Selected sort is persisted to `localStorage` so the preference survives page reloads.
+- **A–Z jump navigation** — an alphabet row above the results grid lets visitors jump to employees by the first letter of their name. Letter filter is AJAX-powered so pagination stays correct across the full dataset. Clicking the active letter (or "All") returns to the full list. Typing in the search box automatically clears any active letter filter (and vice-versa).
+
+### Changed
+- `employee_dir_get_employee_query()` now accepts `sort`, `letter`, and `role__in` args. Sort maps to safe, whitelisted `WP_User_Query` `orderby`/`order`/`meta_key` combinations. Letter filter overrides text search when set.
+- AJAX handler now reads and forwards `sort`, `letter`, `per_page`, and `role` POST params.
+
+### Added
 - **Individual profile page** — each employee name on a card links to `/staff/{username}` via a custom WP rewrite rule. The profile page renders inside the active theme's header/footer and shows all fields unconditionally (ignores visible_fields setting).
 - **AJAX pagination** — numbered page navigation below the results grid; clicking a page number fetches results without a page reload. Driven by the existing `paged` arg in `WP_User_Query`. Search or filter resets to page 1 automatically.
 - **List/grid/vertical view toggle** — two buttons in the filter bar let visitors switch between card grid, compact list, and vertical portrait layout; preference persists in `localStorage`.
