@@ -16,7 +16,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'EMPLOYEE_DIR_VERSION',     '1.0.0' );
+define( 'EMPLOYEE_DIR_VERSION',     '1.17.0' );
 define( 'EMPLOYEE_DIR_PLUGIN_FILE', __FILE__ );
 define( 'EMPLOYEE_DIR_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'EMPLOYEE_DIR_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );

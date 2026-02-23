@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- `EMPLOYEE_DIR_VERSION` constant (`1.0.0`) was out of sync with the plugin header version (`1.17.0`), causing CSS/JS assets to be served with a stale cache-busting query string after updates. Constant is now set to `1.17.0`.
+
+### Changed
+- HR Staff list view now paginates at 50 users per page (prev/next navigation with total count) instead of loading all WordPress users in a single unbounded query.
+
+### Refactored
+- Extracted `employee_dir_hr_profile_data_from_post()` helper in `hr-admin.php` to eliminate the duplicate `$profile_data` array construction that existed in both the save-user and create-user handlers.
+
 ### Added
 - **HR Staff Management tab** — new **Staff** tab under Settings → Internal Staff Directory. HR can create new WP user accounts (with all employee directory fields in one form), edit any user's core WP fields (name, email, display name, role) and all `employee_dir_` meta fields, remove users from the directory (reversible — adds to the blocked list), and restore removed users. All actions guarded by `edit_users` capability with per-action nonces.
 - **Blocked users** — admins can enter usernames or email addresses (one per line) under **Settings → Internal Staff Directory → Blocked users** to permanently exclude specific accounts from the directory. Stored as user IDs; applied as `exclude` in every `WP_User_Query` including AJAX searches.

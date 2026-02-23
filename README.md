@@ -116,7 +116,8 @@ internal-staff-directory/
 │   ├── settings.php          # Admin settings page, Settings API registration, sanitizers
 │   ├── profile-page.php      # Rewrite rule, template_redirect handler, profile URL helper
 │   ├── directory.php         # Shortcode, WP_User_Query logic, AJAX handler, pagination
-│   └── admin.php             # Admin profile field UI (render and save)
+│   ├── admin.php             # Admin profile field UI (render and save)
+│   └── hr-admin.php          # HR Staff tab: create/edit/remove/restore users with pagination
 ├── templates/
 │   ├── directory.php         # Shortcode output markup (search, filter, results, pagination)
 │   ├── profile-card.php      # Individual employee card partial

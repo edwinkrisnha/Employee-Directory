@@ -101,6 +101,27 @@ function employee_dir_hr_parse_start_date_from_post( array $post_data ) {
 	return '';
 }
 
+/**
+ * Extract employee directory profile field values from raw POST data.
+ * Single source of truth used by both the save and create handlers.
+ *
+ * @param array $post_data Raw POST array (typically $_POST).
+ * @return array Unsanitized field values keyed by profile field name.
+ *               Sanitization is delegated to employee_dir_save_profile().
+ */
+function employee_dir_hr_profile_data_from_post( array $post_data ) {
+	return [
+		'department'   => isset( $post_data['ed_department'] )   ? wp_unslash( $post_data['ed_department'] )   : '',
+		'job_title'    => isset( $post_data['ed_job_title'] )    ? wp_unslash( $post_data['ed_job_title'] )    : '',
+		'phone'        => isset( $post_data['ed_phone'] )        ? wp_unslash( $post_data['ed_phone'] )        : '',
+		'office'       => isset( $post_data['ed_office'] )       ? wp_unslash( $post_data['ed_office'] )       : '',
+		'bio'          => isset( $post_data['ed_bio'] )          ? wp_unslash( $post_data['ed_bio'] )          : '',
+		'photo_url'    => isset( $post_data['ed_photo_url'] )    ? wp_unslash( $post_data['ed_photo_url'] )    : '',
+		'linkedin_url' => isset( $post_data['ed_linkedin_url'] ) ? wp_unslash( $post_data['ed_linkedin_url'] ) : '',
+		'start_date'   => employee_dir_hr_parse_start_date_from_post( $post_data ),
+	];
+}
+
 // ---------------------------------------------------------------------------
 // Tab dispatcher + notices
 // ---------------------------------------------------------------------------
@@ -155,12 +176,21 @@ function employee_dir_hr_render_notices() {
 
 /**
  * Render the staff table — all WP users, including blocked ones.
+ * Results are paginated at 50 per page.
  */
 function employee_dir_hr_render_list_view() {
+	$per_page    = 50;
+	$paged       = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$total_users = count_users();
+	$total       = (int) $total_users['total_users'];
+	$total_pages = (int) ceil( $total / $per_page );
+	$paged       = min( $paged, max( 1, $total_pages ) );
+
 	$users = get_users( [
 		'orderby' => 'display_name',
 		'order'   => 'ASC',
-		'number'  => -1,
+		'number'  => $per_page,
+		'offset'  => ( $paged - 1 ) * $per_page,
 	] );
 	?>
 	<div style="margin-top:1.5rem;">
@@ -236,6 +266,49 @@ function employee_dir_hr_render_list_view() {
 				<?php endforeach; ?>
 			</tbody>
 		</table>
+
+		<?php if ( $total_pages > 1 ) : ?>
+		<div class="tablenav bottom" style="margin-top:0.75rem;">
+			<div class="tablenav-pages">
+				<span class="displaying-num">
+					<?php
+					printf(
+						/* translators: %d: total number of users */
+						esc_html( _n( '%d user', '%d users', $total, 'internal-staff-directory' ) ),
+						(int) $total
+					);
+					?>
+				</span>
+				<span class="pagination-links">
+					<?php if ( $paged > 1 ) : ?>
+						<a class="prev-page button" href="<?php echo esc_url( employee_dir_hr_tab_url( [ 'paged' => $paged - 1 ] ) ); ?>">
+							<span aria-hidden="true">&lsaquo;</span>
+						</a>
+					<?php else : ?>
+						<span class="prev-page button disabled" aria-hidden="true">&lsaquo;</span>
+					<?php endif; ?>
+					<span class="paging-input">
+						<?php
+						printf(
+							/* translators: 1: current page, 2: total pages */
+							esc_html__( '%1$d of %2$d', 'internal-staff-directory' ),
+							(int) $paged,
+							(int) $total_pages
+						);
+						?>
+					</span>
+					<?php if ( $paged < $total_pages ) : ?>
+						<a class="next-page button" href="<?php echo esc_url( employee_dir_hr_tab_url( [ 'paged' => $paged + 1 ] ) ); ?>">
+							<span aria-hidden="true">&rsaquo;</span>
+						</a>
+					<?php else : ?>
+						<span class="next-page button disabled" aria-hidden="true">&rsaquo;</span>
+					<?php endif; ?>
+				</span>
+			</div>
+		</div>
+		<?php endif; ?>
+
 		<?php endif; ?>
 	</div>
 	<?php
@@ -528,17 +601,7 @@ function employee_dir_hr_handle_save_user() {
 	}
 
 	// Save employee_dir_ meta via the centralized helper.
-	$profile_data = [
-		'department'   => isset( $_POST['ed_department'] )   ? wp_unslash( $_POST['ed_department'] )   : '',
-		'job_title'    => isset( $_POST['ed_job_title'] )    ? wp_unslash( $_POST['ed_job_title'] )    : '',
-		'phone'        => isset( $_POST['ed_phone'] )        ? wp_unslash( $_POST['ed_phone'] )        : '',
-		'office'       => isset( $_POST['ed_office'] )       ? wp_unslash( $_POST['ed_office'] )       : '',
-		'bio'          => isset( $_POST['ed_bio'] )          ? wp_unslash( $_POST['ed_bio'] )          : '',
-		'photo_url'    => isset( $_POST['ed_photo_url'] )    ? wp_unslash( $_POST['ed_photo_url'] )    : '',
-		'linkedin_url' => isset( $_POST['ed_linkedin_url'] ) ? wp_unslash( $_POST['ed_linkedin_url'] ) : '',
-		'start_date'   => employee_dir_hr_parse_start_date_from_post( $_POST ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	];
-	employee_dir_save_profile( $user_id, $profile_data );
+	employee_dir_save_profile( $user_id, employee_dir_hr_profile_data_from_post( $_POST ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 
 	wp_redirect( employee_dir_hr_tab_url( [ 'saved' => 1 ] ) );
 	exit;
@@ -610,17 +673,7 @@ function employee_dir_hr_handle_create_user() {
 	}
 
 	// Save employee_dir_ meta.
-	$profile_data = [
-		'department'   => isset( $_POST['ed_department'] )   ? wp_unslash( $_POST['ed_department'] )   : '',
-		'job_title'    => isset( $_POST['ed_job_title'] )    ? wp_unslash( $_POST['ed_job_title'] )    : '',
-		'phone'        => isset( $_POST['ed_phone'] )        ? wp_unslash( $_POST['ed_phone'] )        : '',
-		'office'       => isset( $_POST['ed_office'] )       ? wp_unslash( $_POST['ed_office'] )       : '',
-		'bio'          => isset( $_POST['ed_bio'] )          ? wp_unslash( $_POST['ed_bio'] )          : '',
-		'photo_url'    => isset( $_POST['ed_photo_url'] )    ? wp_unslash( $_POST['ed_photo_url'] )    : '',
-		'linkedin_url' => isset( $_POST['ed_linkedin_url'] ) ? wp_unslash( $_POST['ed_linkedin_url'] ) : '',
-		'start_date'   => employee_dir_hr_parse_start_date_from_post( $_POST ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	];
-	employee_dir_save_profile( $user_id, $profile_data );
+	employee_dir_save_profile( $user_id, employee_dir_hr_profile_data_from_post( $_POST ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 
 	wp_redirect( employee_dir_hr_tab_url( [ 'created' => 1 ] ) );
 	exit;
