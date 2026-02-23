@@ -89,6 +89,12 @@ function employee_dir_get_employee_query( array $args = [] ) {
 		];
 	}
 
+	// Exclude blocked users from every query.
+	$blocked = array_filter( array_map( 'absint', (array) $settings['blocked_users'] ) );
+	if ( ! empty( $blocked ) ) {
+		$query_args['exclude'] = $blocked;
+	}
+
 	/**
 	 * Filters the WP_User_Query arguments before the employee query runs.
 	 *

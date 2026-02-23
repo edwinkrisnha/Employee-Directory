@@ -38,6 +38,7 @@ function employee_dir_get_settings() {
 		'message_platform' => 'none',
 		'dicebear_style'   => 'big-smile',
 		'new_hire_days'    => 90,
+		'blocked_users'    => [],
 	] );
 
 	$saved = get_option( 'employee_dir_settings', [] );
@@ -155,6 +156,14 @@ function employee_dir_register_settings() {
 		'employee-dir-settings',
 		'employee_dir_main'
 	);
+
+	add_settings_field(
+		'employee_dir_blocked_users',
+		__( 'Blocked users', 'internal-staff-directory' ),
+		'employee_dir_field_blocked_users',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
 }
 add_action( 'admin_init', 'employee_dir_register_settings' );
 
@@ -233,6 +242,27 @@ function employee_dir_sanitize_settings( $input ) {
 	// new_hire_days: integer 0–365 (0 = feature disabled)
 	if ( isset( $input['new_hire_days'] ) ) {
 		$output['new_hire_days'] = min( 365, absint( $input['new_hire_days'] ) );
+	}
+
+	// blocked_users: textarea of usernames/emails → stored as int[] of user IDs.
+	$output['blocked_users'] = [];
+	if ( isset( $input['blocked_users'] ) && is_string( $input['blocked_users'] ) ) {
+		$lines = preg_split( '/[\r\n]+/', $input['blocked_users'] );
+		$ids   = [];
+		foreach ( $lines as $line ) {
+			$entry = trim( sanitize_text_field( $line ) );
+			if ( '' === $entry ) {
+				continue;
+			}
+			$user = get_user_by( 'login', $entry );
+			if ( ! $user ) {
+				$user = get_user_by( 'email', $entry );
+			}
+			if ( $user ) {
+				$ids[] = $user->ID;
+			}
+		}
+		$output['blocked_users'] = array_values( array_unique( $ids ) );
 	}
 
 	return $output;
@@ -507,6 +537,38 @@ function employee_dir_field_new_hire_days() {
 	/>
 	<p class="description">
 		<?php esc_html_e( 'Employees who joined within this many days get a "New" badge on their card. Set to 0 to disable.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "Blocked users" textarea.
+ * Displays stored user IDs resolved back to their login names (one per line).
+ */
+function employee_dir_field_blocked_users() {
+	$settings = employee_dir_get_settings();
+	$blocked  = array_filter( array_map( 'absint', (array) $settings['blocked_users'] ) );
+
+	// Resolve stored IDs back to logins for the textarea display.
+	$lines = [];
+	foreach ( $blocked as $user_id ) {
+		$user = get_userdata( $user_id );
+		if ( $user ) {
+			$lines[] = $user->user_login;
+		}
+	}
+	$value = implode( "\n", $lines );
+	?>
+	<textarea
+		id="employee_dir_blocked_users"
+		name="employee_dir_settings[blocked_users]"
+		rows="6"
+		cols="40"
+		class="large-text"
+		placeholder="<?php esc_attr_e( 'One username or email address per line', 'internal-staff-directory' ); ?>"
+	><?php echo esc_textarea( $value ); ?></textarea>
+	<p class="description">
+		<?php esc_html_e( 'Users listed here (by username or email, one per line) will never appear in the directory.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }
