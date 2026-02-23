@@ -75,7 +75,7 @@ Each WordPress user gains eight additional fields on their profile page (under *
 | Bio | `employee_dir_bio` | Short biography |
 | Profile Photo URL | `employee_dir_photo_url` | Direct URL to a profile photo |
 | LinkedIn URL | `employee_dir_linkedin_url` | Full LinkedIn profile URL |
-| Start Date | `employee_dir_start_date` | Date joined (YYYY-MM-DD); shown as tenure on cards |
+| Start Date | `employee_dir_start_date` | Month/year joined (YYYY-MM); shown as tenure on cards |
 
 Users with the `edit_user` capability can edit these fields. Employees can update their own fields from the **Profile** screen.
 

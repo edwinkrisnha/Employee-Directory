@@ -23,7 +23,7 @@ function employee_dir_show_extra_profile_fields( $user ) {
 		<?php foreach ( $fields as $key => $label ) : ?>
 		<tr>
 			<th scope="row">
-				<label for="ed_<?php echo esc_attr( $key ); ?>">
+				<label for="<?php echo 'start_date' === $key ? 'ed_start_month' : 'ed_' . esc_attr( $key ); ?>">
 					<?php echo esc_html( $label ); ?>
 				</label>
 			</th>
@@ -54,15 +54,47 @@ function employee_dir_show_extra_profile_fields( $user ) {
 						</p>
 					<?php endif; ?>
 				<?php elseif ( 'start_date' === $key ) : ?>
-					<input
-						type="date"
-						id="ed_<?php echo esc_attr( $key ); ?>"
-						name="ed_<?php echo esc_attr( $key ); ?>"
-						value="<?php echo esc_attr( $profile[ $key ] ?? '' ); ?>"
-						class="regular-text"
-					/>
+					<?php
+					$raw_start  = $profile[ $key ] ?? '';
+					$saved_year = $saved_month = '';
+					if ( preg_match( '/^(\d{4})-(\d{2})/', $raw_start, $m ) ) {
+						$saved_year  = $m[1];
+						$saved_month = $m[2];
+					}
+					$current_year = (int) gmdate( 'Y' );
+					$months = [
+						'01' => __( 'January',   'internal-staff-directory' ),
+						'02' => __( 'February',  'internal-staff-directory' ),
+						'03' => __( 'March',     'internal-staff-directory' ),
+						'04' => __( 'April',     'internal-staff-directory' ),
+						'05' => __( 'May',       'internal-staff-directory' ),
+						'06' => __( 'June',      'internal-staff-directory' ),
+						'07' => __( 'July',      'internal-staff-directory' ),
+						'08' => __( 'August',    'internal-staff-directory' ),
+						'09' => __( 'September', 'internal-staff-directory' ),
+						'10' => __( 'October',   'internal-staff-directory' ),
+						'11' => __( 'November',  'internal-staff-directory' ),
+						'12' => __( 'December',  'internal-staff-directory' ),
+					];
+					?>
+					<select name="ed_start_month" id="ed_start_month">
+						<option value=""><?php esc_html_e( '— Month —', 'internal-staff-directory' ); ?></option>
+						<?php foreach ( $months as $num => $name ) : ?>
+							<option value="<?php echo esc_attr( $num ); ?>" <?php selected( $saved_month, $num ); ?>>
+								<?php echo esc_html( $name ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+					<select name="ed_start_year" id="ed_start_year" style="margin-left:6px;">
+						<option value=""><?php esc_html_e( '— Year —', 'internal-staff-directory' ); ?></option>
+						<?php for ( $y = $current_year; $y >= 2017; $y-- ) : ?>
+							<option value="<?php echo esc_attr( $y ); ?>" <?php selected( $saved_year, (string) $y ); ?>>
+								<?php echo esc_html( $y ); ?>
+							</option>
+						<?php endfor; ?>
+					</select>
 					<p class="description">
-						<?php esc_html_e( 'The date this employee joined the company. Used to show tenure on the directory card.', 'internal-staff-directory' ); ?>
+						<?php esc_html_e( 'The month this employee joined the company. Used to show tenure on the directory card.', 'internal-staff-directory' ); ?>
 					</p>
 				<?php else : ?>
 					<input
@@ -92,9 +124,17 @@ function employee_dir_save_extra_profile_fields( $user_id ) {
 		return;
 	}
 
-	$data = [];
+	$current_year = (int) gmdate( 'Y' );
+	$data         = [];
 	foreach ( array_keys( employee_dir_fields() ) as $field ) {
-		if ( isset( $_POST[ 'ed_' . $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( 'start_date' === $field ) {
+			// Assembled from two separate selects; never typed by the user.
+			$year  = isset( $_POST['ed_start_year'] )  ? absint( wp_unslash( $_POST['ed_start_year'] ) )  : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$month = isset( $_POST['ed_start_month'] ) ? absint( wp_unslash( $_POST['ed_start_month'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$data['start_date'] = ( $year >= 2017 && $year <= $current_year && $month >= 1 && $month <= 12 )
+				? sprintf( '%04d-%02d', $year, $month )
+				: '';
+		} elseif ( isset( $_POST[ 'ed_' . $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$data[ $field ] = wp_unslash( $_POST[ 'ed_' . $field ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
 	}

@@ -95,6 +95,10 @@ function employee_dir_years_at_company( $start_date ) {
 	if ( '' === (string) $start_date ) {
 		return '';
 	}
+	// Normalize YYYY-MM to YYYY-MM-01 so DateTime parses it unambiguously.
+	if ( preg_match( '/^\d{4}-\d{2}$/', $start_date ) ) {
+		$start_date .= '-01';
+	}
 	try {
 		$start = new DateTime( $start_date );
 		$now   = new DateTime( 'today' );

@@ -24,6 +24,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `employee_dir_years_at_company( $start_date )` — computes a human-readable tenure string from a YYYY-MM-DD date.
 - `register_activation_hook` / `register_deactivation_hook` flush rewrite rules so the `/staff/` URL works immediately after activation.
 
+### Changed
+- **Start Date field** — replaced the free-text date input with two dropdowns (Month + Year) so users select rather than type. Saves as `YYYY-MM`. Existing `YYYY-MM-DD` values are automatically normalized on re-save.
+
 ### Added
 - **Avatar fallback style setting** — admin setting under **Settings → Internal Staff Directory** to choose which of the 31 [DiceBear](https://www.dicebear.com/styles/) styles is used for employees without a profile photo. Styles are grouped into Minimalist and Characters. Default: Big Smile.
 
