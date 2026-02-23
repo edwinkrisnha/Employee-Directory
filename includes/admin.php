@@ -173,32 +173,64 @@ function employee_dir_admin_render_photo_field( $value ) {
 		id="ed-photo-preview"
 		src="<?php echo esc_url( $value ); ?>"
 		alt=""
-		style="margin-top:8px;max-width:96px;max-height:96px;border-radius:4px;object-fit:cover;<?php echo $has_photo ? '' : 'display:none;'; ?>"
+		style="margin-top:8px;width:80px;height:80px;border-radius:4px;object-fit:cover;<?php echo $has_photo ? '' : 'display:none;'; ?>"
 	>
 	<p class="description">
-		<?php esc_html_e( 'Direct URL to profile photo. Leave blank to use the generated avatar.', 'internal-staff-directory' ); ?>
+		<?php esc_html_e( 'Select a photo from the media library — you will be prompted to crop it to a square. Leave blank to use the generated avatar.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }
 
 /**
- * Returns the inline JS for the wp.media photo uploader.
+ * Returns the inline JS for the wp.media photo uploader with built-in square crop.
+ * Opens the media library, then transitions to WP's native Cropper state (1:1 ratio).
  * Shared between the admin profile screen and the HR Staff tab.
  *
  * @return string
  */
 function employee_dir_admin_photo_js() {
 	return "jQuery(function($){
-	var frame;
+	function setPhoto(url){
+		$('#ed_photo_url').val(url);
+		$('#ed-photo-preview').attr('src',url).show();
+		$('#ed-photo-remove').show();
+	}
 	$(document).on('click','#ed-photo-select',function(e){
 		e.preventDefault();
-		if(frame){frame.open();return;}
-		frame=wp.media({title:'Select Profile Photo',button:{text:'Use this photo'},multiple:false,library:{type:'image'}});
+		var saved=null;
+		var frame=wp.media({
+			button:{text:'Crop & Select',close:false},
+			states:[
+				new wp.media.controller.Library({
+					title:'Select Profile Photo',
+					library:wp.media.query({type:'image'}),
+					multiple:false,
+					date:false,
+				}),
+				new wp.media.controller.Cropper({
+					canSkipCrop:true,
+					suggestedWidth:400,
+					suggestedHeight:400,
+					control:{params:{
+						flex_width:false,
+						flex_height:false,
+						width:400,
+						height:400,
+					}},
+				}),
+			]
+		});
 		frame.on('select',function(){
-			var url=frame.state().get('selection').first().toJSON().url;
-			$('#ed_photo_url').val(url);
-			$('#ed-photo-preview').attr('src',url).show();
-			$('#ed-photo-remove').show();
+			saved=frame.state().get('selection').first().toJSON();
+			frame.setState('cropper');
+		});
+		frame.on('cropped',function(croppedImage){
+			setPhoto(croppedImage.url);
+			frame.close();
+		});
+		frame.on('skipped',function(){
+			if(saved){setPhoto(saved.url);}
+			frame.close();
 		});
 		frame.open();
 	});
