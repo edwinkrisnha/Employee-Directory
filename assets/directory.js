@@ -23,8 +23,7 @@
 	var $search     = $( '#ed-search' );
 	var $department = $( '#ed-department' );
 	var $sort       = $( '#ed-sort' );
-	var $toggle     = $( '#ed-view-toggle' );
-	var $vtoggle    = $( '#ed-vertical-toggle' );
+	var $viewBtns = $('.ed-view-btn');
 	var debounceTimer;
 
 	// Pagination state — seeded from PHP via wp_localize_script.
@@ -42,18 +41,18 @@
 	// View helpers
 	// -------------------------------------------------------------------------
 
-	function applyView( view ) {
+	function applyView(view) {
 		currentView = view;
-		$results.toggleClass( 'ed-results--list',     view === 'list' );
-		$results.toggleClass( 'ed-results--vertical', view === 'vertical' );
 
-		$toggle.attr(  'aria-pressed', String( view === 'list' ) );
-		$toggle.attr(  'aria-label',   view === 'list' ? 'Switch to grid view'     : 'Switch to list view' );
-		$toggle.text(  view === 'list' ? 'Grid view' : 'List view' );
+		$results
+			.toggleClass('ed-results--list', view === 'list')
+			.toggleClass('ed-results--vertical', view === 'vertical');
 
-		$vtoggle.attr( 'aria-pressed', String( view === 'vertical' ) );
-		$vtoggle.attr( 'aria-label',   view === 'vertical' ? 'Switch to grid view' : 'Switch to vertical view' );
-		$vtoggle.text( view === 'vertical' ? 'Grid view' : 'Vertical view' );
+		$viewBtns.each(function () {
+			var isActive = $(this).data('view') === view;
+			$(this).toggleClass('is-active', isActive)
+						.attr('aria-pressed', isActive);
+		});
 	}
 
 	// Restore saved preference on load.
@@ -63,19 +62,11 @@
 		applyView( 'grid' );
 	}
 
-	// List/grid toggle — toggles between 'list' and 'grid'.
-	$toggle.on( 'click', function () {
-		var next = currentView === 'list' ? 'grid' : 'list';
-		applyView( next );
-		try { localStorage.setItem( LS_VIEW_KEY, next ); } catch ( e ) { /* ignore */ }
-	} );
-
-	// Vertical toggle — toggles between 'vertical' and 'grid'.
-	$vtoggle.on( 'click', function () {
-		var next = currentView === 'vertical' ? 'grid' : 'vertical';
-		applyView( next );
-		try { localStorage.setItem( LS_VIEW_KEY, next ); } catch ( e ) { /* ignore */ }
-	} );
+	$(document).on('click', '.ed-view-btn', function () {
+		var view = $(this).data('view');
+		applyView(view);
+		try { localStorage.setItem(LS_VIEW_KEY, view); } catch (e) {}
+	});
 
 	// -------------------------------------------------------------------------
 	// Sort
@@ -105,7 +96,7 @@
 	function applyLetter( letter ) {
 		currentLetter = letter;
 		// Update active state on all letter buttons.
-		$( '.ed-az-nav__btn' ).each( function () {
+		$( '.ed-az-nav__link' ).each( function () {
 			var btnLetter = $( this ).data( 'letter' );
 			$( this ).toggleClass( 'is-active', btnLetter === letter && letter !== '' );
 		} );
@@ -114,7 +105,8 @@
 	}
 
 	// Delegated click on A–Z buttons (works even if nav is outside the AJAX-replaced region).
-	$( document ).on( 'click', '.ed-az-nav__btn', function () {
+	$( document ).on( 'click', '.ed-az-nav__link', function ( e ) {
+		e.preventDefault();
 		var clicked = String( $( this ).data( 'letter' ) );
 
 		// Toggle off if the same letter is clicked again.

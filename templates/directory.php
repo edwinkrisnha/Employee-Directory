@@ -54,35 +54,26 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				<option value="start_date_desc"><?php esc_html_e( 'Newest join date', 'internal-staff-directory' ); ?></option>
 				<option value="department_asc"><?php esc_html_e( 'Department', 'internal-staff-directory' ); ?></option>
 			</select>
+		</div>
 
-			<button
-				type="button"
-				id="ed-view-toggle"
-				class="ed-view-toggle"
-				aria-pressed="false"
-				aria-label="<?php esc_attr_e( 'Switch to list view', 'internal-staff-directory' ); ?>"
-			><?php esc_html_e( 'List view', 'internal-staff-directory' ); ?></button>
-
-			<button
-				type="button"
-				id="ed-vertical-toggle"
-				class="ed-view-toggle"
-				aria-pressed="false"
-				aria-label="<?php esc_attr_e( 'Switch to vertical view', 'internal-staff-directory' ); ?>"
-			><?php esc_html_e( 'Vertical view', 'internal-staff-directory' ); ?></button>
+		<div class="ed-toolbar">
+			<nav class="ed-az-nav" id="ed-az-nav" aria-label="<?php esc_attr_e( 'Jump to letter', 'internal-staff-directory' ); ?>">
+				<?php foreach ( range( 'A', 'Z' ) as $az_letter ) : ?>
+					<a href="#" class="ed-az-nav__link" data-letter="<?php echo esc_attr( $az_letter ); ?>">
+						<?php echo esc_html( $az_letter ); ?>
+					</a>
+				<?php endforeach; ?>
+				<a href="#" class="ed-az-nav__link" data-letter="">
+					<?php esc_html_e( 'All', 'internal-staff-directory' ); ?>
+				</a>
+			</nav>
+			<div class="ed-view-switch" role="group" aria-label="View switch">
+				<button type="button" class="ed-view-btn" data-view="grid">Grid</button>
+				<button type="button" class="ed-view-btn" data-view="list">List</button>
+				<button type="button" class="ed-view-btn" data-view="vertical">Vertical</button>
+			</div>
 		</div>
 	</form>
-
-	<nav class="ed-az-nav" id="ed-az-nav" aria-label="<?php esc_attr_e( 'Jump to letter', 'internal-staff-directory' ); ?>">
-		<?php foreach ( range( 'A', 'Z' ) as $az_letter ) : ?>
-			<button type="button" class="ed-az-nav__btn" data-letter="<?php echo esc_attr( $az_letter ); ?>">
-				<?php echo esc_html( $az_letter ); ?>
-			</button>
-		<?php endforeach; ?>
-		<button type="button" class="ed-az-nav__btn ed-az-nav__all" data-letter="">
-			<?php esc_html_e( 'All', 'internal-staff-directory' ); ?>
-		</button>
-	</nav>
 
 	<div class="ed-results" id="ed-results" aria-live="polite" aria-atomic="true">
 		<?php if ( $employees ) : ?>
