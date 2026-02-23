@@ -17,7 +17,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Years at company** – Tenure displayed on cards; full start date shown on profile pages
 - **Send message quick action** – Configurable button on each card: Email, Microsoft Teams, or hidden
 - **Copy email** – Inline copy icon next to each email address; click to copy to clipboard, icon flashes green to confirm
-- **Photo fallback** – Uses custom photo URLs or falls back to Gravatar automatically
+- **Photo fallback** – Uses custom photo URLs or falls back to a generated [DiceBear](https://www.dicebear.com/) avatar (big-smile style, seeded from the employee's name) automatically
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates
 - **Conditional asset loading** – CSS and JS only load on pages that use the shortcode or the profile page

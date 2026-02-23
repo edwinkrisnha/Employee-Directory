@@ -18,14 +18,14 @@ $dept_color       = $settings['dept_colors'] ? employee_dir_dept_color( $profile
 $message_platform = $settings['message_platform'];
 $profile_url      = employee_dir_get_profile_url( $user );
 
-$photo = ! empty( $profile['photo_url'] )
-	? esc_url( $profile['photo_url'] )
-	: get_avatar_url( $user->ID, [ 'size' => $photo_px * 2 ] ); // 2x for HiDPI
-
 $full_name = trim( $user->first_name . ' ' . $user->last_name );
 if ( '' === $full_name ) {
 	$full_name = $user->display_name;
 }
+
+$photo = ! empty( $profile['photo_url'] )
+	? esc_url( $profile['photo_url'] )
+	: esc_url( 'https://api.dicebear.com/9.x/big-smile/svg?seed=' . rawurlencode( $full_name ) );
 
 $article_style = $dept_color ? ' style="--ed-dept-color:' . esc_attr( $dept_color ) . ';"' : '';
 ?>

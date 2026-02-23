@@ -25,6 +25,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `register_activation_hook` / `register_deactivation_hook` flush rewrite rules so the `/staff/` URL works immediately after activation.
 
 ### Changed
+- **Photo fallback** — replaced Gravatar with a [DiceBear](https://www.dicebear.com/) generated avatar (big-smile style, seeded from the employee's name) when no custom photo URL is set.
 - `employee_dir_get_employees()` is now a thin wrapper around `employee_dir_get_employee_query()->get_results()` — no breaking change for existing callers.
 - AJAX handler now returns `pagination` HTML alongside `html` in the JSON response.
 - Settings page under **Settings → Internal Staff Directory** with four configurable options:
