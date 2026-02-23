@@ -82,6 +82,7 @@
 	gap: 1rem;
 	padding: 1rem;
 	border: 1px solid #e2e8f0;
+	border-left: 3px solid var(--ed-dept-color, #e2e8f0);
 	border-radius: 6px;
 	background: #fff;
 	align-items: flex-start;
@@ -100,6 +101,10 @@
 	height: 64px;
 	background: #f1f5f9;
 }
+
+.ed-card__photo--small  { width: 40px; height: 40px; }
+.ed-card__photo--medium { width: 64px; height: 64px; }
+.ed-card__photo--large  { width: 96px; height: 96px; }
 
 .ed-card__info {
 	min-width: 0;
@@ -156,6 +161,52 @@
 
 .ed-card a:hover {
 	text-decoration: underline;
+}
+
+.ed-card__social,
+.ed-card__tenure {
+	margin: 0.25rem 0 0;
+	font-size: 0.8rem;
+	color: #64748b;
+}
+
+/* --------------------------------------------------------------------------
+   Copy email + action buttons
+   -------------------------------------------------------------------------- */
+
+.ed-copy-email {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0 0 0 0.25rem;
+	color: #94a3b8;
+	font-size: 0.875rem;
+	vertical-align: middle;
+	line-height: 1;
+}
+
+.ed-copy-email:hover {
+	color: #2563eb;
+}
+
+.ed-card__action-btn {
+	display: inline-block;
+	margin-top: 0.5rem;
+	padding: 0.25rem 0.625rem;
+	border: 1px solid #cbd5e1;
+	border-radius: 4px;
+	font-size: 0.8rem;
+	color: #475569;
+	text-decoration: none;
+	background: #f8fafc;
+	cursor: pointer;
+	transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.ed-card__action-btn:hover {
+	border-color: #2563eb;
+	color: #2563eb;
+	background: #eff6ff;
 }
 
 /* --------------------------------------------------------------------------
@@ -227,6 +278,28 @@
 
 .ed-results--list .ed-card__bio {
 	display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Vertical card view
+   -------------------------------------------------------------------------- */
+
+.ed-results--vertical {
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.ed-results--vertical .ed-card {
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+.ed-results--vertical .ed-card__photo {
+	margin-bottom: 0.75rem;
+}
+
+.ed-results--vertical .ed-card__name {
+	white-space: normal;
 }
 
 /* --------------------------------------------------------------------------
@@ -383,6 +456,12 @@
 
 .ed-profile-page__detail-row a:hover {
 	text-decoration: underline;
+}
+
+.ed-profile-page__tenure {
+	margin-left: 0.375rem;
+	font-size: 0.8125rem;
+	color: #94a3b8;
 }
 
 .ed-profile-page__bio h2 {

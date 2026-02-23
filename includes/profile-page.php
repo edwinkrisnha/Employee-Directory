@@ -23,6 +23,14 @@ function employee_dir_register_rewrite() {
 		'index.php?ed_profile=$matches[1]',
 		'top'
 	);
+
+	// Flush once if our rule isn't in the compiled set yet (e.g. after a code
+	// update while the plugin was already active). The flag is cleared on flush
+	// so this only runs once per missing-rule condition.
+	if ( ! get_option( 'employee_dir_rewrite_flushed' ) ) {
+		flush_rewrite_rules( false );
+		update_option( 'employee_dir_rewrite_flushed', 1 );
+	}
 }
 add_action( 'init', 'employee_dir_register_rewrite' );
 

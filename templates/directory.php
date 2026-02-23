@@ -52,6 +52,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				aria-pressed="false"
 				aria-label="<?php esc_attr_e( 'Switch to list view', 'internal-staff-directory' ); ?>"
 			><?php esc_html_e( 'List view', 'internal-staff-directory' ); ?></button>
+
+			<button
+				type="button"
+				id="ed-vertical-toggle"
+				class="ed-view-toggle"
+				aria-pressed="false"
+				aria-label="<?php esc_attr_e( 'Switch to vertical view', 'internal-staff-directory' ); ?>"
+			><?php esc_html_e( 'Vertical view', 'internal-staff-directory' ); ?></button>
 		</div>
 	</form>
 

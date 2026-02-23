@@ -29,10 +29,13 @@ function employee_dir_get_settings() {
 	 * }
 	 */
 	$defaults = apply_filters( 'employee_dir_settings_defaults', [
-		'per_page'       => 200,
-		'roles'          => [],
-		'visible_fields' => [ 'department', 'job_title', 'phone', 'office', 'bio' ],
-		'require_login'  => 0,
+		'per_page'         => 200,
+		'roles'            => [],
+		'visible_fields'   => [ 'department', 'job_title', 'phone', 'office', 'bio', 'linkedin_url', 'start_date' ],
+		'require_login'    => 0,
+		'photo_size'       => 'medium',
+		'dept_colors'      => 1,
+		'message_platform' => 'none',
 	] );
 
 	$saved = get_option( 'employee_dir_settings', [] );
@@ -110,6 +113,30 @@ function employee_dir_register_settings() {
 		'employee-dir-settings',
 		'employee_dir_main'
 	);
+
+	add_settings_field(
+		'employee_dir_photo_size',
+		__( 'Profile photo size', 'internal-staff-directory' ),
+		'employee_dir_field_photo_size',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
+
+	add_settings_field(
+		'employee_dir_dept_colors',
+		__( 'Department color stripe', 'internal-staff-directory' ),
+		'employee_dir_field_dept_colors',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
+
+	add_settings_field(
+		'employee_dir_message_platform',
+		__( 'Send message platform', 'internal-staff-directory' ),
+		'employee_dir_field_message_platform',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
 }
 add_action( 'admin_init', 'employee_dir_register_settings' );
 
@@ -144,7 +171,7 @@ function employee_dir_sanitize_settings( $input ) {
 	}
 
 	// visible_fields: whitelist against known text fields
-	$allowed_fields          = [ 'department', 'job_title', 'phone', 'office', 'bio' ];
+	$allowed_fields          = [ 'department', 'job_title', 'phone', 'office', 'bio', 'linkedin_url', 'start_date' ];
 	$output['visible_fields'] = [];
 	if ( ! empty( $input['visible_fields'] ) && is_array( $input['visible_fields'] ) ) {
 		foreach ( $input['visible_fields'] as $field ) {
@@ -156,6 +183,21 @@ function employee_dir_sanitize_settings( $input ) {
 
 	// require_login: boolean stored as int
 	$output['require_login'] = ! empty( $input['require_login'] ) ? 1 : 0;
+
+	// photo_size: whitelist
+	$valid_sizes = [ 'small', 'medium', 'large' ];
+	$output['photo_size'] = ( isset( $input['photo_size'] ) && in_array( $input['photo_size'], $valid_sizes, true ) )
+		? $input['photo_size']
+		: 'medium';
+
+	// dept_colors: boolean stored as int
+	$output['dept_colors'] = ! empty( $input['dept_colors'] ) ? 1 : 0;
+
+	// message_platform: whitelist
+	$valid_platforms = [ 'none', 'mailto', 'teams' ];
+	$output['message_platform'] = ( isset( $input['message_platform'] ) && in_array( $input['message_platform'], $valid_platforms, true ) )
+		? $input['message_platform']
+		: 'none';
 
 	return $output;
 }
@@ -222,11 +264,13 @@ function employee_dir_field_visible_fields() {
 	$settings       = employee_dir_get_settings();
 	$visible        = $settings['visible_fields'];
 	$allowed_fields = [
-		'department' => __( 'Department', 'internal-staff-directory' ),
-		'job_title'  => __( 'Job Title', 'internal-staff-directory' ),
-		'phone'      => __( 'Phone', 'internal-staff-directory' ),
-		'office'     => __( 'Office / Location', 'internal-staff-directory' ),
-		'bio'        => __( 'Bio', 'internal-staff-directory' ),
+		'department'   => __( 'Department', 'internal-staff-directory' ),
+		'job_title'    => __( 'Job Title', 'internal-staff-directory' ),
+		'phone'        => __( 'Phone', 'internal-staff-directory' ),
+		'office'       => __( 'Office / Location', 'internal-staff-directory' ),
+		'bio'          => __( 'Bio', 'internal-staff-directory' ),
+		'linkedin_url' => __( 'LinkedIn URL', 'internal-staff-directory' ),
+		'start_date'   => __( 'Start Date / Years at company', 'internal-staff-directory' ),
 	];
 	?>
 	<fieldset>
@@ -269,6 +313,75 @@ function employee_dir_field_require_login() {
 	</label>
 	<p class="description">
 		<?php esc_html_e( 'When enabled, guests see a login prompt instead of the directory.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "Profile photo size" radio group.
+ */
+function employee_dir_field_photo_size() {
+	$settings = employee_dir_get_settings();
+	$current  = $settings['photo_size'];
+	$options  = [
+		'small'  => __( 'Small (40 px)', 'internal-staff-directory' ),
+		'medium' => __( 'Medium (64 px)', 'internal-staff-directory' ),
+		'large'  => __( 'Large (96 px)', 'internal-staff-directory' ),
+	];
+	foreach ( $options as $value => $label ) : ?>
+		<label style="display:inline-block; margin-right: 1rem;">
+			<input
+				type="radio"
+				name="employee_dir_settings[photo_size]"
+				value="<?php echo esc_attr( $value ); ?>"
+				<?php checked( $current, $value ); ?>
+			/>
+			<?php echo esc_html( $label ); ?>
+		</label>
+	<?php endforeach;
+}
+
+/**
+ * Render the "Department color stripe" checkbox.
+ */
+function employee_dir_field_dept_colors() {
+	$settings = employee_dir_get_settings();
+	?>
+	<label>
+		<input
+			type="checkbox"
+			name="employee_dir_settings[dept_colors]"
+			value="1"
+			<?php checked( 1, $settings['dept_colors'] ); ?>
+		/>
+		<?php esc_html_e( 'Color-code cards by department (auto-assigned)', 'internal-staff-directory' ); ?>
+	</label>
+	<p class="description">
+		<?php esc_html_e( 'Adds a colored left border to each card based on the employee\'s department.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "Send message platform" select.
+ */
+function employee_dir_field_message_platform() {
+	$settings = employee_dir_get_settings();
+	$options  = [
+		'none'   => __( 'None (hide button)', 'internal-staff-directory' ),
+		'mailto' => __( 'Email (opens email client)', 'internal-staff-directory' ),
+		'teams'  => __( 'Microsoft Teams', 'internal-staff-directory' ),
+	];
+	?>
+	<select name="employee_dir_settings[message_platform]" id="employee_dir_message_platform">
+		<?php foreach ( $options as $value => $label ) : ?>
+			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $settings['message_platform'], $value ); ?>>
+				<?php echo esc_html( $label ); ?>
+			</option>
+		<?php endforeach; ?>
+	</select>
+	<p class="description">
+		<?php esc_html_e( 'Shows a quick-action button on each employee card to start a conversation.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }

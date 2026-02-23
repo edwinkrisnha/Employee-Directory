@@ -9,10 +9,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - **Individual profile page** — each employee name on a card links to `/staff/{username}` via a custom WP rewrite rule. The profile page renders inside the active theme's header/footer and shows all fields unconditionally (ignores visible_fields setting).
 - **AJAX pagination** — numbered page navigation below the results grid; clicking a page number fetches results without a page reload. Driven by the existing `paged` arg in `WP_User_Query`. Search or filter resets to page 1 automatically.
-- **List/grid view toggle** — a button in the filter bar switches between the card grid and a compact single-column list; preference persists in `localStorage`.
+- **List/grid/vertical view toggle** — two buttons in the filter bar let visitors switch between card grid, compact list, and vertical portrait layout; preference persists in `localStorage`.
+- **Department color stripe** — each card gets a 3 px left border color auto-assigned from an 8-color palette based on the department name (deterministic, no admin config needed). Toggleable via settings.
+- **Adjustable photo size** — admin setting controls card photo diameter: Small (40 px), Medium (64 px, default), or Large (96 px).
+- **LinkedIn URL profile field** — `employee_dir_linkedin_url` meta key; appears as a link on cards and profile pages.
+- **Start Date profile field** — `employee_dir_start_date` meta key (YYYY-MM-DD); cards show computed tenure (e.g. "3 yrs"), profile pages show the full formatted date plus tenure.
+- **Copy email button** — a clipboard icon button next to each card's email address copies it to the clipboard via `navigator.clipboard`.
+- **Send message quick action** — admin setting: None (hidden), Email (mailto: link), or Microsoft Teams (`teams.microsoft.com/l/chat` URL using the employee's email). Rendered as a small action button on each card.
+- **Photo click → profile page** — clicking the card photo navigates to the employee's full profile page.
 - `employee_dir_get_employee_query()` — new public function that returns the full `WP_User_Query` object (with `count_total => true`) for callers that need both results and total count.
 - `employee_dir_get_profile_url( WP_User $user )` — returns the canonical `/staff/{user_nicename}/` URL for a given user.
 - `employee_dir_pagination_html( $total_pages, $current_page )` — generates accessible pagination nav HTML with ellipsis compression; used by both the shortcode and the AJAX handler.
+- `employee_dir_dept_color( $dept )` — returns a deterministic hex color for a department name.
+- `employee_dir_years_at_company( $start_date )` — computes a human-readable tenure string from a YYYY-MM-DD date.
 - `register_activation_hook` / `register_deactivation_hook` flush rewrite rules so the `/staff/` URL works immediately after activation.
 
 ### Changed

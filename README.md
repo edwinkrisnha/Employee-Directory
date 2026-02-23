@@ -7,15 +7,21 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Searchable directory** – Search employees by name, email, or username
 - **Department filtering** – Instant filtering by department with no page reload
 - **AJAX-powered** – Debounced search, live filtering, and pagination without full page refreshes
-- **Extended user profiles** – Adds Department, Job Title, Phone, Office/Location, Bio, and Photo URL fields to WordPress user profiles
+- **Extended user profiles** – Adds Department, Job Title, Phone, Office/Location, Bio, Photo URL, LinkedIn URL, and Start Date fields to WordPress user profiles
 - **Individual profile pages** – Each employee card links to `/staff/{username}` — a full profile page rendered inside the active theme
 - **AJAX pagination** – Numbered page navigation; search or filter resets to page 1 automatically
-- **List / grid view toggle** – Switch between card grid and compact list view; preference saved to `localStorage`
+- **Three-state view toggle** – Switch between grid, compact list, and vertical card layouts; preference saved to `localStorage`
+- **Department color stripes** – Cards get an auto-assigned colored left border based on department name
+- **Adjustable photo size** – Admin setting: Small (40 px) / Medium (64 px) / Large (96 px)
+- **LinkedIn links** – Employee cards and profile pages link directly to LinkedIn profiles
+- **Years at company** – Tenure displayed on cards; full start date shown on profile pages
+- **Copy email button** – One-click clipboard copy of any employee's email address
+- **Send message quick action** – Configurable button on each card: Email, Microsoft Teams, or hidden
 - **Photo fallback** – Uses custom photo URLs or falls back to Gravatar automatically
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates
 - **Conditional asset loading** – CSS and JS only load on pages that use the shortcode or the profile page
-- **Admin settings page** – Configure results per page, visible card fields, included roles, and login requirement from **Settings → Internal Staff Directory**
+- **Admin settings page** – Configure results per page, visible card fields, photo size, color stripes, message platform, included roles, and login requirement from **Settings → Internal Staff Directory**
 
 ## Requirements
 
@@ -49,12 +55,15 @@ Go to **Settings → Internal Staff Directory** to configure:
 |---|---|---|
 | Results per page | 200 | Maximum employees shown (1–500) |
 | User roles to include | All roles | Restrict the directory to specific WordPress roles |
-| Visible card fields | All fields | Show or hide Department, Job Title, Phone, Office/Location, Bio |
+| Visible card fields | All fields | Show or hide Department, Job Title, Phone, Office/Location, Bio, LinkedIn URL, Start Date |
 | Require login to view | Off | When on, guests see a login prompt instead of the directory |
+| Profile photo size | Medium (64 px) | Card photo diameter: Small (40 px), Medium (64 px), or Large (96 px) |
+| Department color stripe | On | Color-code each card's left border by department (auto-assigned) |
+| Send message platform | None | Show a quick-action button on cards: None, Email (mailto:), or Microsoft Teams |
 
 ### Profile Fields
 
-Each WordPress user gains six additional fields on their profile page (under **Profile** in the admin, or the standard user edit screen):
+Each WordPress user gains eight additional fields on their profile page (under **Profile** in the admin, or the standard user edit screen):
 
 | Field | Meta Key | Description |
 |---|---|---|
@@ -64,6 +73,8 @@ Each WordPress user gains six additional fields on their profile page (under **P
 | Office / Location | `employee_dir_office` | Physical office or remote location |
 | Bio | `employee_dir_bio` | Short biography |
 | Profile Photo URL | `employee_dir_photo_url` | Direct URL to a profile photo |
+| LinkedIn URL | `employee_dir_linkedin_url` | Full LinkedIn profile URL |
+| Start Date | `employee_dir_start_date` | Date joined (YYYY-MM-DD); shown as tenure on cards |
 
 Users with the `edit_user` capability can edit these fields. Employees can update their own fields from the **Profile** screen.
 

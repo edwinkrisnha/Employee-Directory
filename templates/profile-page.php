@@ -4,7 +4,8 @@
  *
  * Variables provided by employee_dir_profile_template_redirect():
  *   @var WP_User $user
- *   @var array   $profile  Keys: department, job_title, phone, office, bio, photo_url
+ *   @var array   $profile  Keys: department, job_title, phone, office, bio, photo_url,
+ *                                 linkedin_url, start_date
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -82,6 +83,36 @@ if ( $referrer && str_starts_with( $referrer, home_url() ) ) {
 				<div class="ed-profile-page__detail-row">
 					<dt><?php esc_html_e( 'Office / Location', 'internal-staff-directory' ); ?></dt>
 					<dd><?php echo esc_html( $profile['office'] ); ?></dd>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $profile['linkedin_url'] ) ) : ?>
+				<div class="ed-profile-page__detail-row">
+					<dt><?php esc_html_e( 'LinkedIn', 'internal-staff-directory' ); ?></dt>
+					<dd>
+						<a href="<?php echo esc_url( $profile['linkedin_url'] ); ?>" target="_blank" rel="noopener noreferrer">
+							<?php echo esc_html( $profile['linkedin_url'] ); ?>
+						</a>
+					</dd>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $profile['start_date'] ) ) : ?>
+				<?php
+				$start_label  = esc_html( $profile['start_date'] );
+				$start_tenure = employee_dir_years_at_company( $profile['start_date'] );
+				try {
+					$start_label = ( new DateTime( $profile['start_date'] ) )->format( 'F Y' );
+				} catch ( Exception $e ) {} // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				?>
+				<div class="ed-profile-page__detail-row">
+					<dt><?php esc_html_e( 'Start Date', 'internal-staff-directory' ); ?></dt>
+					<dd>
+						<?php echo esc_html( $start_label ); ?>
+						<?php if ( $start_tenure ) : ?>
+							<span class="ed-profile-page__tenure">(<?php echo esc_html( $start_tenure ); ?>)</span>
+						<?php endif; ?>
+					</dd>
 				</div>
 			<?php endif; ?>
 		</dl>

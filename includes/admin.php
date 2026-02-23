@@ -35,7 +35,7 @@ function employee_dir_show_extra_profile_fields( $user ) {
 						rows="4"
 						class="large-text"
 					><?php echo esc_textarea( $profile[ $key ] ?? '' ); ?></textarea>
-				<?php elseif ( 'photo_url' === $key ) : ?>
+				<?php elseif ( 'photo_url' === $key || 'linkedin_url' === $key ) : ?>
 					<input
 						type="url"
 						id="ed_<?php echo esc_attr( $key ); ?>"
@@ -44,8 +44,25 @@ function employee_dir_show_extra_profile_fields( $user ) {
 						class="regular-text"
 						placeholder="https://"
 					/>
+					<?php if ( 'photo_url' === $key ) : ?>
+						<p class="description">
+							<?php esc_html_e( 'Direct URL to profile photo. Leave blank to use Gravatar.', 'internal-staff-directory' ); ?>
+						</p>
+					<?php else : ?>
+						<p class="description">
+							<?php esc_html_e( 'e.g. https://linkedin.com/in/yourname', 'internal-staff-directory' ); ?>
+						</p>
+					<?php endif; ?>
+				<?php elseif ( 'start_date' === $key ) : ?>
+					<input
+						type="date"
+						id="ed_<?php echo esc_attr( $key ); ?>"
+						name="ed_<?php echo esc_attr( $key ); ?>"
+						value="<?php echo esc_attr( $profile[ $key ] ?? '' ); ?>"
+						class="regular-text"
+					/>
 					<p class="description">
-						<?php esc_html_e( 'Direct URL to profile photo. Leave blank to use Gravatar.', 'internal-staff-directory' ); ?>
+						<?php esc_html_e( 'The date this employee joined the company. Used to show tenure on the directory card.', 'internal-staff-directory' ); ?>
 					</p>
 				<?php else : ?>
 					<input
