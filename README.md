@@ -17,7 +17,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Years at company** – Tenure displayed on cards; full start date shown on profile pages
 - **Send message quick action** – Configurable button on each card: Email, Microsoft Teams, or hidden
 - **Copy email** – Inline copy icon next to each email address; click to copy to clipboard, icon flashes green to confirm
-- **Photo fallback** – Uses custom photo URLs or falls back to a generated [DiceBear](https://www.dicebear.com/) avatar (big-smile style, seeded from the employee's name) automatically
+- **Photo fallback** – Uses custom photo URLs or falls back to a generated [DiceBear](https://www.dicebear.com/) avatar (style configurable in settings, seeded from the employee's name) automatically
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates
 - **Conditional asset loading** – CSS and JS only load on pages that use the shortcode or the profile page
@@ -60,6 +60,7 @@ Go to **Settings → Internal Staff Directory** to configure:
 | Profile photo size | Medium (64 px) | Card photo diameter: Small (40 px), Medium (64 px), or Large (96 px) |
 | Department color stripe | On | Color-code each card's left border by department (auto-assigned) |
 | Send message platform | None | Show a quick-action button on cards: None, Email (mailto:), or Microsoft Teams |
+| Avatar fallback style | Big Smile | DiceBear style used when an employee has no profile photo — [31 styles available](https://www.dicebear.com/styles/) |
 
 ### Profile Fields
 

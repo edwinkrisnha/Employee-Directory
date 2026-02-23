@@ -24,8 +24,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `employee_dir_years_at_company( $start_date )` — computes a human-readable tenure string from a YYYY-MM-DD date.
 - `register_activation_hook` / `register_deactivation_hook` flush rewrite rules so the `/staff/` URL works immediately after activation.
 
+### Added
+- **Avatar fallback style setting** — admin setting under **Settings → Internal Staff Directory** to choose which of the 31 [DiceBear](https://www.dicebear.com/styles/) styles is used for employees without a profile photo. Styles are grouped into Minimalist and Characters. Default: Big Smile.
+
 ### Changed
-- **Photo fallback** — replaced Gravatar with a [DiceBear](https://www.dicebear.com/) generated avatar (big-smile style, seeded from the employee's name) when no custom photo URL is set.
+- **Photo fallback** — replaced Gravatar with a [DiceBear](https://www.dicebear.com/) generated avatar (seeded from the employee's name) when no custom photo URL is set. Style is configurable in settings (31 styles available, default: Big Smile).
 - `employee_dir_get_employees()` is now a thin wrapper around `employee_dir_get_employee_query()->get_results()` — no breaking change for existing callers.
 - AJAX handler now returns `pagination` HTML alongside `html` in the JSON response.
 - Settings page under **Settings → Internal Staff Directory** with four configurable options:

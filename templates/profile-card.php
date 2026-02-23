@@ -25,7 +25,7 @@ if ( '' === $full_name ) {
 
 $photo = ! empty( $profile['photo_url'] )
 	? esc_url( $profile['photo_url'] )
-	: esc_url( 'https://api.dicebear.com/9.x/big-smile/svg?seed=' . rawurlencode( $full_name ) );
+	: esc_url( 'https://api.dicebear.com/9.x/' . $settings['dicebear_style'] . '/svg?seed=' . rawurlencode( $full_name ) );
 
 $article_style = $dept_color ? ' style="--ed-dept-color:' . esc_attr( $dept_color ) . ';"' : '';
 ?>

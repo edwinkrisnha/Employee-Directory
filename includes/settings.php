@@ -36,6 +36,7 @@ function employee_dir_get_settings() {
 		'photo_size'       => 'medium',
 		'dept_colors'      => 1,
 		'message_platform' => 'none',
+		'dicebear_style'   => 'big-smile',
 	] );
 
 	$saved = get_option( 'employee_dir_settings', [] );
@@ -137,6 +138,14 @@ function employee_dir_register_settings() {
 		'employee-dir-settings',
 		'employee_dir_main'
 	);
+
+	add_settings_field(
+		'employee_dir_dicebear_style',
+		__( 'Avatar fallback style', 'internal-staff-directory' ),
+		'employee_dir_field_dicebear_style',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
 }
 add_action( 'admin_init', 'employee_dir_register_settings' );
 
@@ -198,6 +207,19 @@ function employee_dir_sanitize_settings( $input ) {
 	$output['message_platform'] = ( isset( $input['message_platform'] ) && in_array( $input['message_platform'], $valid_platforms, true ) )
 		? $input['message_platform']
 		: 'none';
+
+	// dicebear_style: whitelist against all valid DiceBear v9 style slugs
+	$valid_dicebear_styles = [
+		'adventurer', 'adventurer-neutral', 'avataaars', 'avataaars-neutral',
+		'big-ears', 'big-ears-neutral', 'big-smile', 'bottts', 'bottts-neutral',
+		'croodles', 'croodles-neutral', 'dylan', 'fun-emoji', 'glass', 'icons',
+		'identicon', 'initials', 'lorelei', 'lorelei-neutral', 'micah', 'miniavs',
+		'notionists', 'notionists-neutral', 'open-peeps', 'personas', 'pixel-art',
+		'pixel-art-neutral', 'rings', 'shapes', 'thumbs', 'toon-head',
+	];
+	$output['dicebear_style'] = ( isset( $input['dicebear_style'] ) && in_array( $input['dicebear_style'], $valid_dicebear_styles, true ) )
+		? $input['dicebear_style']
+		: 'big-smile';
 
 	return $output;
 }
@@ -382,6 +404,74 @@ function employee_dir_field_message_platform() {
 	</select>
 	<p class="description">
 		<?php esc_html_e( 'Shows a quick-action button on each employee card to start a conversation.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "Avatar fallback style" select (DiceBear v9 styles).
+ */
+function employee_dir_field_dicebear_style() {
+	$settings = employee_dir_get_settings();
+	$current  = $settings['dicebear_style'];
+
+	$groups = [
+		__( 'Minimalist', 'internal-staff-directory' ) => [
+			'glass'      => 'Glass',
+			'icons'      => 'Icons',
+			'identicon'  => 'Identicon',
+			'initials'   => 'Initials',
+			'rings'      => 'Rings',
+			'shapes'     => 'Shapes',
+			'thumbs'     => 'Thumbs',
+		],
+		__( 'Characters', 'internal-staff-directory' ) => [
+			'adventurer'          => 'Adventurer',
+			'adventurer-neutral'  => 'Adventurer Neutral',
+			'avataaars'           => 'Avataaars',
+			'avataaars-neutral'   => 'Avataaars Neutral',
+			'big-ears'            => 'Big Ears',
+			'big-ears-neutral'    => 'Big Ears Neutral',
+			'big-smile'           => 'Big Smile',
+			'bottts'              => 'Bottts',
+			'bottts-neutral'      => 'Bottts Neutral',
+			'croodles'            => 'Croodles',
+			'croodles-neutral'    => 'Croodles Neutral',
+			'dylan'               => 'Dylan',
+			'fun-emoji'           => 'Fun Emoji',
+			'lorelei'             => 'Lorelei',
+			'lorelei-neutral'     => 'Lorelei Neutral',
+			'micah'               => 'Micah',
+			'miniavs'             => 'Miniavs',
+			'notionists'          => 'Notionists',
+			'notionists-neutral'  => 'Notionists Neutral',
+			'open-peeps'          => 'Open Peeps',
+			'personas'            => 'Personas',
+			'pixel-art'           => 'Pixel Art',
+			'pixel-art-neutral'   => 'Pixel Art Neutral',
+			'toon-head'           => 'Toon Head',
+		],
+	];
+	?>
+	<select name="employee_dir_settings[dicebear_style]" id="employee_dir_dicebear_style">
+		<?php foreach ( $groups as $group_label => $styles ) : ?>
+			<optgroup label="<?php echo esc_attr( $group_label ); ?>">
+				<?php foreach ( $styles as $value => $label ) : ?>
+					<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $current, $value ); ?>>
+						<?php echo esc_html( $label ); ?>
+					</option>
+				<?php endforeach; ?>
+			</optgroup>
+		<?php endforeach; ?>
+	</select>
+	<p class="description">
+		<?php
+		printf(
+			/* translators: %s: URL to DiceBear style previews */
+			esc_html__( 'Style used for generated avatars when an employee has no profile photo set. %s', 'internal-staff-directory' ),
+			'<a href="https://www.dicebear.com/styles/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Preview all styles', 'internal-staff-directory' ) . '</a>'
+		);
+		?>
 	</p>
 	<?php
 }
