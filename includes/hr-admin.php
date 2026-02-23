@@ -337,8 +337,7 @@ function employee_dir_hr_render_edit_view( $user_id ) {
 			<tr>
 				<th scope="row"><label for="ed_photo_url"><?php esc_html_e( 'Profile Photo URL', 'internal-staff-directory' ); ?></label></th>
 				<td>
-					<input type="url" id="ed_photo_url" name="ed_photo_url" value="<?php echo esc_attr( $profile['photo_url'] ); ?>" class="regular-text" placeholder="https://">
-					<p class="description"><?php esc_html_e( 'Direct URL to profile photo. Leave blank to use the generated avatar.', 'internal-staff-directory' ); ?></p>
+					<?php employee_dir_admin_render_photo_field( $profile['photo_url'] ); ?>
 				</td>
 			</tr>
 			<tr>
@@ -451,8 +450,7 @@ function employee_dir_hr_render_create_view() {
 			<tr>
 				<th scope="row"><label for="ed_photo_url"><?php esc_html_e( 'Profile Photo URL', 'internal-staff-directory' ); ?></label></th>
 				<td>
-					<input type="url" id="ed_photo_url" name="ed_photo_url" value="" class="regular-text" placeholder="https://">
-					<p class="description"><?php esc_html_e( 'Direct URL to profile photo. Leave blank to use the generated avatar.', 'internal-staff-directory' ); ?></p>
+					<?php employee_dir_admin_render_photo_field( '' ); ?>
 				</td>
 			</tr>
 			<tr>
@@ -691,3 +689,33 @@ function employee_dir_hr_handle_restore_user() {
 	exit;
 }
 add_action( 'admin_post_employee_dir_hr_restore_user', 'employee_dir_hr_handle_restore_user' );
+
+// ---------------------------------------------------------------------------
+// Asset enqueueing
+// ---------------------------------------------------------------------------
+
+/**
+ * Enqueue wp.media and the uploader JS on the HR Staff tab (edit and create views only).
+ *
+ * @param string $hook Current admin page hook.
+ */
+function employee_dir_hr_enqueue_media( $hook ) {
+	if ( 'options-general.php' !== $hook ) {
+		return;
+	}
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	if ( ! isset( $_GET['page'] ) || 'employee-dir-settings' !== $_GET['page'] ) {
+		return;
+	}
+	if ( ! isset( $_GET['tab'] ) || 'staff' !== $_GET['tab'] ) {
+		return;
+	}
+	$view = isset( $_GET['view'] ) ? sanitize_key( $_GET['view'] ) : '';
+	// phpcs:enable
+	if ( ! in_array( $view, [ 'edit', 'create' ], true ) ) {
+		return;
+	}
+	wp_enqueue_media();
+	wp_add_inline_script( 'media-editor', employee_dir_admin_photo_js() );
+}
+add_action( 'admin_enqueue_scripts', 'employee_dir_hr_enqueue_media' );

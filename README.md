@@ -1,5 +1,7 @@
 # Internal Staff Directory
 
+[GitHub](https://github.com/edwinkrisnha/Employee-Directory)
+
 A lightweight WordPress plugin for internal staff directories. Provides a searchable, filterable employee directory with AJAX-powered search, department filtering, and extended user profile fields.
 
 ## Features

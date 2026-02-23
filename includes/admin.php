@@ -35,7 +35,9 @@ function employee_dir_show_extra_profile_fields( $user ) {
 						rows="4"
 						class="large-text"
 					><?php echo esc_textarea( $profile[ $key ] ?? '' ); ?></textarea>
-				<?php elseif ( 'photo_url' === $key || 'linkedin_url' === $key ) : ?>
+				<?php elseif ( 'photo_url' === $key ) : ?>
+					<?php employee_dir_admin_render_photo_field( $profile[ $key ] ?? '' ); ?>
+				<?php elseif ( 'linkedin_url' === $key ) : ?>
 					<input
 						type="url"
 						id="ed_<?php echo esc_attr( $key ); ?>"
@@ -44,15 +46,9 @@ function employee_dir_show_extra_profile_fields( $user ) {
 						class="regular-text"
 						placeholder="https://"
 					/>
-					<?php if ( 'photo_url' === $key ) : ?>
-						<p class="description">
-							<?php esc_html_e( 'Direct URL to profile photo. Leave blank to use Gravatar.', 'internal-staff-directory' ); ?>
-						</p>
-					<?php else : ?>
-						<p class="description">
-							<?php esc_html_e( 'e.g. https://linkedin.com/in/yourname', 'internal-staff-directory' ); ?>
-						</p>
-					<?php endif; ?>
+					<p class="description">
+						<?php esc_html_e( 'e.g. https://linkedin.com/in/yourname', 'internal-staff-directory' ); ?>
+					</p>
 				<?php elseif ( 'start_date' === $key ) : ?>
 					<?php
 					$raw_start  = $profile[ $key ] ?? '';
@@ -143,3 +139,88 @@ function employee_dir_save_extra_profile_fields( $user_id ) {
 }
 add_action( 'personal_options_update',  'employee_dir_save_extra_profile_fields' );
 add_action( 'edit_user_profile_update', 'employee_dir_save_extra_profile_fields' );
+
+// ---------------------------------------------------------------------------
+// Media library uploader for profile photo
+// ---------------------------------------------------------------------------
+
+/**
+ * Render the profile photo input with a media library picker button and live preview.
+ * Used on both the WP admin profile screen and the HR Staff tab.
+ *
+ * @param string $value Current photo URL (may be empty).
+ */
+function employee_dir_admin_render_photo_field( $value ) {
+	$has_photo = '' !== (string) $value;
+	?>
+	<input
+		type="url"
+		id="ed_photo_url"
+		name="ed_photo_url"
+		value="<?php echo esc_attr( $value ); ?>"
+		class="regular-text"
+		placeholder="https://"
+	/>
+	<button type="button" class="button" id="ed-photo-select" style="margin-left:4px;">
+		<?php esc_html_e( 'Select Photo', 'internal-staff-directory' ); ?>
+	</button>
+	<button type="button" class="button-link" id="ed-photo-remove"
+		style="margin-left:8px;color:#a00;<?php echo $has_photo ? '' : 'display:none;'; ?>">
+		<?php esc_html_e( 'Remove', 'internal-staff-directory' ); ?>
+	</button>
+	<br>
+	<img
+		id="ed-photo-preview"
+		src="<?php echo esc_url( $value ); ?>"
+		alt=""
+		style="margin-top:8px;max-width:96px;max-height:96px;border-radius:4px;object-fit:cover;<?php echo $has_photo ? '' : 'display:none;'; ?>"
+	>
+	<p class="description">
+		<?php esc_html_e( 'Direct URL to profile photo. Leave blank to use the generated avatar.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Returns the inline JS for the wp.media photo uploader.
+ * Shared between the admin profile screen and the HR Staff tab.
+ *
+ * @return string
+ */
+function employee_dir_admin_photo_js() {
+	return "jQuery(function($){
+	var frame;
+	$(document).on('click','#ed-photo-select',function(e){
+		e.preventDefault();
+		if(frame){frame.open();return;}
+		frame=wp.media({title:'Select Profile Photo',button:{text:'Use this photo'},multiple:false,library:{type:'image'}});
+		frame.on('select',function(){
+			var url=frame.state().get('selection').first().toJSON().url;
+			$('#ed_photo_url').val(url);
+			$('#ed-photo-preview').attr('src',url).show();
+			$('#ed-photo-remove').show();
+		});
+		frame.open();
+	});
+	$(document).on('click','#ed-photo-remove',function(e){
+		e.preventDefault();
+		$('#ed_photo_url').val('');
+		$('#ed-photo-preview').attr('src','').hide();
+		$(this).hide();
+	});
+});";
+}
+
+/**
+ * Enqueue wp.media and the uploader JS on the user profile / user-edit screen.
+ *
+ * @param string $hook Current admin page hook.
+ */
+function employee_dir_admin_enqueue_media( $hook ) {
+	if ( ! in_array( $hook, [ 'profile.php', 'user-edit.php' ], true ) ) {
+		return;
+	}
+	wp_enqueue_media();
+	wp_add_inline_script( 'media-editor', employee_dir_admin_photo_js() );
+}
+add_action( 'admin_enqueue_scripts', 'employee_dir_admin_enqueue_media' );
