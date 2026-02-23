@@ -716,6 +716,7 @@ function employee_dir_hr_enqueue_media( $hook ) {
 		return;
 	}
 	wp_enqueue_media();
+	wp_add_inline_script( 'media-editor', employee_dir_admin_photo_vars(), 'before' );
 	wp_add_inline_script( 'media-editor', employee_dir_admin_photo_js() );
 }
 add_action( 'admin_enqueue_scripts', 'employee_dir_hr_enqueue_media' );

@@ -141,7 +141,7 @@ add_action( 'personal_options_update',  'employee_dir_save_extra_profile_fields'
 add_action( 'edit_user_profile_update', 'employee_dir_save_extra_profile_fields' );
 
 // ---------------------------------------------------------------------------
-// Media library uploader for profile photo
+// Media library uploader + server-side square crop for profile photo
 // ---------------------------------------------------------------------------
 
 /**
@@ -168,6 +168,7 @@ function employee_dir_admin_render_photo_field( $value ) {
 		style="margin-left:8px;color:#a00;<?php echo $has_photo ? '' : 'display:none;'; ?>">
 		<?php esc_html_e( 'Remove', 'internal-staff-directory' ); ?>
 	</button>
+	<span id="ed-photo-spinner" class="spinner" style="float:none;margin-left:4px;vertical-align:middle;<?php echo $has_photo ? 'display:none;' : 'display:none;'; ?>"></span>
 	<br>
 	<img
 		id="ed-photo-preview"
@@ -176,15 +177,28 @@ function employee_dir_admin_render_photo_field( $value ) {
 		style="margin-top:8px;width:80px;height:80px;border-radius:4px;object-fit:cover;<?php echo $has_photo ? '' : 'display:none;'; ?>"
 	>
 	<p class="description">
-		<?php esc_html_e( 'Select a photo from the media library — you will be prompted to crop it to a square. Leave blank to use the generated avatar.', 'internal-staff-directory' ); ?>
+		<?php esc_html_e( 'Choose a photo from the media library — non-square images are automatically center-cropped to a square. Leave blank to use the generated avatar.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }
 
 /**
- * Returns the inline JS for the wp.media photo uploader with built-in square crop.
- * Opens the media library, then transitions to WP's native Cropper state (1:1 ratio).
- * Shared between the admin profile screen and the HR Staff tab.
+ * Returns a JS variable block that localises ajaxUrl and the crop nonce.
+ * Output as an inline script BEFORE the main photo uploader JS.
+ *
+ * @return string
+ */
+function employee_dir_admin_photo_vars() {
+	return 'var employeeDirAdminPhoto=' . wp_json_encode( [
+		'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
+		'cropNonce' => wp_create_nonce( 'employee_dir_photo_crop' ),
+	] ) . ';';
+}
+
+/**
+ * Returns the inline JS for the photo uploader.
+ * After the user selects an image, a server-side AJAX call center-crops it to a
+ * square if needed, then populates the URL input and preview thumbnail.
  *
  * @return string
  */
@@ -194,44 +208,35 @@ function employee_dir_admin_photo_js() {
 		$('#ed_photo_url').val(url);
 		$('#ed-photo-preview').attr('src',url).show();
 		$('#ed-photo-remove').show();
+		$('#ed-photo-spinner').hide();
 	}
+	var frame;
 	$(document).on('click','#ed-photo-select',function(e){
 		e.preventDefault();
-		var saved=null;
-		var frame=wp.media({
-			button:{text:'Crop & Select',close:false},
-			states:[
-				new wp.media.controller.Library({
-					title:'Select Profile Photo',
-					library:wp.media.query({type:'image'}),
-					multiple:false,
-					date:false,
-				}),
-				new wp.media.controller.Cropper({
-					canSkipCrop:true,
-					suggestedWidth:400,
-					suggestedHeight:400,
-					control:{params:{
-						flex_width:false,
-						flex_height:false,
-						width:400,
-						height:400,
-					}},
-				}),
-			]
-		});
-		frame.on('select',function(){
-			saved=frame.state().get('selection').first().toJSON();
-			frame.setState('cropper');
-		});
-		frame.on('cropped',function(croppedImage){
-			setPhoto(croppedImage.url);
-			frame.close();
-		});
-		frame.on('skipped',function(){
-			if(saved){setPhoto(saved.url);}
-			frame.close();
-		});
+		if(!frame){
+			frame=wp.media({
+				title:'Select Profile Photo',
+				button:{text:'Select Photo'},
+				multiple:false,
+				library:{type:'image'}
+			});
+			frame.on('select',function(){
+				var att=frame.state().get('selection').first().toJSON();
+				if(att.width===att.height){
+					setPhoto(att.url);
+					return;
+				}
+				$('#ed-photo-spinner').show();
+				$.post(employeeDirAdminPhoto.ajaxUrl,{
+					action:'employee_dir_auto_crop_photo',
+					nonce:employeeDirAdminPhoto.cropNonce,
+					id:att.id
+				},function(res){
+					if(res.success){setPhoto(res.data.url);}
+					else{setPhoto(att.url);}
+				}).fail(function(){setPhoto(att.url);});
+			});
+		}
 		frame.open();
 	});
 	$(document).on('click','#ed-photo-remove',function(e){
@@ -253,6 +258,95 @@ function employee_dir_admin_enqueue_media( $hook ) {
 		return;
 	}
 	wp_enqueue_media();
+	wp_add_inline_script( 'media-editor', employee_dir_admin_photo_vars(), 'before' );
 	wp_add_inline_script( 'media-editor', employee_dir_admin_photo_js() );
 }
 add_action( 'admin_enqueue_scripts', 'employee_dir_admin_enqueue_media' );
+
+/**
+ * AJAX handler: center-crop an existing media attachment to a square.
+ *
+ * Accepts POST params:
+ *   id    (int)    WP attachment ID
+ *   nonce (string) employee_dir_photo_crop nonce
+ *
+ * Returns JSON { success: true, data: { url: '...' } }
+ *          or  JSON { success: false, data: { message: '...' } }
+ */
+function employee_dir_ajax_auto_crop_photo() {
+	check_ajax_referer( 'employee_dir_photo_crop', 'nonce' );
+
+	if ( ! current_user_can( 'upload_files' ) ) {
+		wp_send_json_error( [ 'message' => __( 'Permission denied.', 'internal-staff-directory' ) ] );
+	}
+
+	$attachment_id = absint( isset( $_POST['id'] ) ? $_POST['id'] : 0 ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	if ( ! $attachment_id || ! wp_attachment_is_image( $attachment_id ) ) {
+		wp_send_json_error( [ 'message' => __( 'Invalid image.', 'internal-staff-directory' ) ] );
+	}
+
+	$file = get_attached_file( $attachment_id );
+	if ( ! $file || ! file_exists( $file ) ) {
+		wp_send_json_error( [ 'message' => __( 'Image file not found.', 'internal-staff-directory' ) ] );
+	}
+
+	// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	$size = @getimagesize( $file );
+	if ( ! $size ) {
+		wp_send_json_error( [ 'message' => __( 'Could not read image dimensions.', 'internal-staff-directory' ) ] );
+	}
+
+	list( $orig_w, $orig_h ) = $size;
+
+	// Already square — return the original URL without any processing.
+	if ( $orig_w === $orig_h ) {
+		wp_send_json_success( [ 'url' => wp_get_attachment_url( $attachment_id ) ] );
+		return;
+	}
+
+	// Deterministic output path: same source always produces the same square file.
+	$pathinfo    = pathinfo( $file );
+	$square_file = $pathinfo['dirname'] . '/ed-' . $attachment_id . '-square.' . strtolower( $pathinfo['extension'] );
+
+	// Return cached square if it already exists.
+	if ( file_exists( $square_file ) ) {
+		$upload_dir = wp_upload_dir();
+		$url = str_replace(
+			wp_normalize_path( $upload_dir['basedir'] ),
+			$upload_dir['baseurl'],
+			wp_normalize_path( $square_file )
+		);
+		wp_send_json_success( [ 'url' => $url ] );
+		return;
+	}
+
+	// Center-crop to the smaller dimension.
+	$sq    = min( $orig_w, $orig_h );
+	$src_x = (int) floor( ( $orig_w - $sq ) / 2 );
+	$src_y = (int) floor( ( $orig_h - $sq ) / 2 );
+
+	$editor = wp_get_image_editor( $file );
+	if ( is_wp_error( $editor ) ) {
+		wp_send_json_error( [ 'message' => $editor->get_error_message() ] );
+	}
+
+	$cropped = $editor->crop( $src_x, $src_y, $sq, $sq );
+	if ( is_wp_error( $cropped ) ) {
+		wp_send_json_error( [ 'message' => $cropped->get_error_message() ] );
+	}
+
+	$saved = $editor->save( $square_file );
+	if ( is_wp_error( $saved ) ) {
+		wp_send_json_error( [ 'message' => $saved->get_error_message() ] );
+	}
+
+	$upload_dir = wp_upload_dir();
+	$url = str_replace(
+		wp_normalize_path( $upload_dir['basedir'] ),
+		$upload_dir['baseurl'],
+		wp_normalize_path( $saved['path'] )
+	);
+
+	wp_send_json_success( [ 'url' => $url ] );
+}
+add_action( 'wp_ajax_employee_dir_auto_crop_photo', 'employee_dir_ajax_auto_crop_photo' );

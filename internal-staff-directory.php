@@ -3,7 +3,7 @@
  * Plugin Name:       Internal Staff Directory
  * Plugin URI:        https://github.com/edwinkrisnha/Employee-Directory
  * Description:       Internal employee directory for company intranet. Searchable staff profiles stored as user meta.
- * Version:           1.16.0
+ * Version:           1.17.0
  * Author:            Edwin Krisnha
  * Author URI:        https://github.com/edwinkrisnha
  * License:           GPLv2 or later
