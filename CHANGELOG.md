@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **HR Staff Management tab** — new **Staff** tab under Settings → Internal Staff Directory. HR can create new WP user accounts (with all employee directory fields in one form), edit any user's core WP fields (name, email, display name, role) and all `employee_dir_` meta fields, remove users from the directory (reversible — adds to the blocked list), and restore removed users. All actions guarded by `edit_users` capability with per-action nonces.
 - **Blocked users** — admins can enter usernames or email addresses (one per line) under **Settings → Internal Staff Directory → Blocked users** to permanently exclude specific accounts from the directory. Stored as user IDs; applied as `exclude` in every `WP_User_Query` including AJAX searches.
 - **"New" hire badge** — employees whose start date is within a configurable window (default: 90 days) get a small green "New" chip next to their name on the card. Window is set in **Settings → Internal Staff Directory → "New" badge window** (0–365 days; 0 disables the badge).
 - **Shortcode attributes** — `[employee_directory]` now accepts `department`, `per_page`, and `role` attributes. Example: `[employee_directory department="Engineering" per_page="10" role="editor"]`. When `department` is locked via the shortcode, the department dropdown is hidden from visitors and the AJAX search always respects the locked value.

@@ -87,7 +87,7 @@ function employee_dir_show_extra_profile_fields( $user ) {
 					</select>
 					<select name="ed_start_year" id="ed_start_year" style="margin-left:6px;">
 						<option value=""><?php esc_html_e( '— Year —', 'internal-staff-directory' ); ?></option>
-						<?php for ( $y = $current_year; $y >= 2017; $y-- ) : ?>
+						<?php for ( $y = $current_year; $y >= employee_dir_start_year_floor(); $y-- ) : ?>
 							<option value="<?php echo esc_attr( $y ); ?>" <?php selected( $saved_year, (string) $y ); ?>>
 								<?php echo esc_html( $y ); ?>
 							</option>
@@ -131,7 +131,7 @@ function employee_dir_save_extra_profile_fields( $user_id ) {
 			// Assembled from two separate selects; never typed by the user.
 			$year  = isset( $_POST['ed_start_year'] )  ? absint( wp_unslash( $_POST['ed_start_year'] ) )  : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$month = isset( $_POST['ed_start_month'] ) ? absint( wp_unslash( $_POST['ed_start_month'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$data['start_date'] = ( $year >= 2017 && $year <= $current_year && $month >= 1 && $month <= 12 )
+			$data['start_date'] = ( $year >= employee_dir_start_year_floor() && $year <= $current_year && $month >= 1 && $month <= 12 )
 				? sprintf( '%04d-%02d', $year, $month )
 				: '';
 		} elseif ( isset( $_POST[ 'ed_' . $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing

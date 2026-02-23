@@ -136,3 +136,13 @@ function employee_dir_get_departments() {
 
 	return $departments;
 }
+
+/**
+ * Returns the earliest year allowed in the start-date year dropdown.
+ * Computed dynamically as current year minus 20 years.
+ *
+ * @return int
+ */
+function employee_dir_start_year_floor() {
+	return (int) gmdate( 'Y' ) - 10;
+}

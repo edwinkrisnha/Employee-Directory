@@ -578,22 +578,41 @@ function employee_dir_field_blocked_users() {
 // ---------------------------------------------------------------------------
 
 /**
- * Render the full settings page.
+ * Render the full settings page with tab navigation.
  */
 function employee_dir_render_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
+
+	$current_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'settings'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$base_url    = admin_url( 'options-general.php?page=employee-dir-settings' );
 	?>
 	<div class="wrap">
 		<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-		<form method="post" action="options.php">
-			<?php
-			settings_fields( 'employee_dir' );
-			do_settings_sections( 'employee-dir-settings' );
-			submit_button();
-			?>
-		</form>
+
+		<nav class="nav-tab-wrapper">
+			<a href="<?php echo esc_url( $base_url . '&tab=settings' ); ?>"
+			   class="nav-tab<?php echo 'settings' === $current_tab ? ' nav-tab-active' : ''; ?>">
+				<?php esc_html_e( 'Settings', 'internal-staff-directory' ); ?>
+			</a>
+			<a href="<?php echo esc_url( $base_url . '&tab=staff' ); ?>"
+			   class="nav-tab<?php echo 'staff' === $current_tab ? ' nav-tab-active' : ''; ?>">
+				<?php esc_html_e( 'Staff', 'internal-staff-directory' ); ?>
+			</a>
+		</nav>
+
+		<?php if ( 'staff' === $current_tab ) : ?>
+			<?php employee_dir_hr_render_staff_tab(); ?>
+		<?php else : ?>
+			<form method="post" action="options.php">
+				<?php
+				settings_fields( 'employee_dir' );
+				do_settings_sections( 'employee-dir-settings' );
+				submit_button();
+				?>
+			</form>
+		<?php endif; ?>
 	</div>
 	<?php
 }
