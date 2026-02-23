@@ -6,7 +6,7 @@
  * - Immediate AJAX on department change.
  * - AJAX pagination: numbered page buttons update results without a page reload.
  * - Three-state view toggle: grid (default) / list / vertical — persisted to localStorage.
- * - Copy email: clipboard button next to each employee's email address.
+ * - Copy email: icon button next to each email address copies it to the clipboard.
  */
 ( function ( $ ) {
 	'use strict';
@@ -156,10 +156,15 @@
 	// Copy email
 	// -------------------------------------------------------------------------
 
+	// Delegate clicks on copy-email buttons (works after AJAX DOM replacement).
 	$( document ).on( 'click', '.ed-copy-email', function () {
-		var email = $( this ).data( 'email' );
-		if ( navigator.clipboard && email ) {
-			navigator.clipboard.writeText( email );
+		var $btn  = $( this );
+		var email = $btn.data( 'email' );
+		if ( navigator.clipboard ) {
+			navigator.clipboard.writeText( email ).then( function () {
+				$btn.addClass( 'is-copied' );
+				setTimeout( function () { $btn.removeClass( 'is-copied' ); }, 1500 );
+			} );
 		}
 	} );
 

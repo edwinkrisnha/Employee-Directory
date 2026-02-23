@@ -15,8 +15,8 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Adjustable photo size** – Admin setting: Small (40 px) / Medium (64 px) / Large (96 px)
 - **LinkedIn links** – Employee cards and profile pages link directly to LinkedIn profiles
 - **Years at company** – Tenure displayed on cards; full start date shown on profile pages
-- **Copy email button** – One-click clipboard copy of any employee's email address
 - **Send message quick action** – Configurable button on each card: Email, Microsoft Teams, or hidden
+- **Copy email** – Inline copy icon next to each email address; click to copy to clipboard, icon flashes green to confirm
 - **Photo fallback** – Uses custom photo URLs or falls back to Gravatar automatically
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates

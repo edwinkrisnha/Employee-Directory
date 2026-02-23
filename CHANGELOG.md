@@ -14,9 +14,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Adjustable photo size** — admin setting controls card photo diameter: Small (40 px), Medium (64 px, default), or Large (96 px).
 - **LinkedIn URL profile field** — `employee_dir_linkedin_url` meta key; appears as a link on cards and profile pages.
 - **Start Date profile field** — `employee_dir_start_date` meta key (YYYY-MM-DD); cards show computed tenure (e.g. "3 yrs"), profile pages show the full formatted date plus tenure.
-- **Copy email button** — a clipboard icon button next to each card's email address copies it to the clipboard via `navigator.clipboard`.
 - **Send message quick action** — admin setting: None (hidden), Email (mailto: link), or Microsoft Teams (`teams.microsoft.com/l/chat` URL using the employee's email). Rendered as a small action button on each card.
 - **Photo click → profile page** — clicking the card photo navigates to the employee's full profile page.
+- **Copy email icon** — inline copy icon (SVG) next to each employee's email address; clicking it copies the address to the clipboard via the Clipboard API; icon turns green briefly to confirm.
 - `employee_dir_get_employee_query()` — new public function that returns the full `WP_User_Query` object (with `count_total => true`) for callers that need both results and total count.
 - `employee_dir_get_profile_url( WP_User $user )` — returns the canonical `/staff/{user_nicename}/` URL for a given user.
 - `employee_dir_pagination_html( $total_pages, $current_page )` — generates accessible pagination nav HTML with ellipsis compression; used by both the shortcode and the AJAX handler.
