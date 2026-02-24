@@ -11,8 +11,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Avatar fallback mismatch: the directory card used DiceBear while the profile page used `get_avatar_url()`, so the same user could show two different placeholder images. Both templates now call a shared `employee_dir_get_avatar_url()` helper.
 
 ### Added
-- `employee_dir_get_avatar_url( WP_User $user, int $size )` — canonical avatar resolver used by both directory templates. Returns the plugin photo when set, DiceBear otherwise.
-- `pre_get_avatar_data` filter (`employee_dir_avatar_data`) — when a plugin photo URL is stored, it now also overrides the WordPress avatar system everywhere `get_avatar()` / `get_avatar_url()` is called (comments, author pages, Gravatar, etc.).
+- `employee_dir_get_avatar_url( WP_User $user, int $size )` — canonical avatar resolver used by both directory templates. Thin wrapper around `get_avatar_url()` now that the filter handles all logic.
+- `pre_get_avatar_data` filter (`employee_dir_avatar_data`) — the plugin photo (or DiceBear fallback) now overrides the WordPress avatar system everywhere `get_avatar()` / `get_avatar_url()` is called (directory templates, comments, author pages, admin screens, etc.). Priority: plugin photo → DiceBear (seeded from display name, style from settings) → WP default for non-WP users (e.g. unregistered commenters).
 
 ### Changed
 - HR Staff list view now paginates at 50 users per page (prev/next navigation with total count) instead of loading all WordPress users in a single unbounded query.

@@ -197,6 +197,19 @@ function employee_dir_avatar_data( $args, $id_or_email ) {
 	if ( $url ) {
 		$args['url']          = $url;
 		$args['found_avatar'] = true;
+		return $args;
+	}
+
+	// No plugin photo — fall back to DiceBear so WP's default avatar is never shown.
+	$user = get_userdata( $user_id );
+	if ( $user ) {
+		$settings  = employee_dir_get_settings();
+		$full_name = trim( $user->first_name . ' ' . $user->last_name );
+		if ( '' === $full_name ) {
+			$full_name = $user->display_name;
+		}
+		$args['url']          = 'https://api.dicebear.com/9.x/' . $settings['dicebear_style'] . '/svg?seed=' . rawurlencode( $full_name );
+		$args['found_avatar'] = true;
 	}
 
 	return $args;
@@ -205,26 +218,13 @@ add_filter( 'pre_get_avatar_data', 'employee_dir_avatar_data', 10, 2 );
 
 /**
  * Return the display avatar URL for a directory employee.
- *
- * Priority: plugin photo → DiceBear (directory-only fallback).
- * Use this in directory templates instead of bare get_avatar_url() so that the
- * DiceBear setting is honoured even for users without a Gravatar account.
+ * The pre_get_avatar_data filter above handles priority (plugin photo → DiceBear),
+ * so this is a thin wrapper that adds escaping and a size hint for template callers.
  *
  * @param WP_User $user
- * @param int     $size Pixel size hint (passed to DiceBear seed only; plugin photo is always original size).
+ * @param int     $size Pixel size hint.
  * @return string Already-escaped URL, safe to echo directly.
  */
 function employee_dir_get_avatar_url( WP_User $user, $size = 64 ) {
-	$url = get_user_meta( $user->ID, 'employee_dir_photo_url', true );
-	if ( $url ) {
-		return esc_url( $url );
-	}
-
-	$settings  = employee_dir_get_settings();
-	$full_name = trim( $user->first_name . ' ' . $user->last_name );
-	if ( '' === $full_name ) {
-		$full_name = $user->display_name;
-	}
-
-	return esc_url( 'https://api.dicebear.com/9.x/' . $settings['dicebear_style'] . '/svg?seed=' . rawurlencode( $full_name ) );
+	return esc_url( get_avatar_url( $user->ID, [ 'size' => $size ] ) );
 }

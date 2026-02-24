@@ -19,7 +19,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Years at company** – Tenure displayed on cards; full start date shown on profile pages
 - **Send message quick action** – Configurable button on each card: Email, Microsoft Teams, or hidden
 - **Copy email** – Inline copy icon next to each email address; click to copy to clipboard, icon flashes green to confirm
-- **Photo fallback** – Uses custom photo URLs or falls back to a generated [DiceBear](https://www.dicebear.com/) avatar (style configurable in settings, seeded from the employee's name) automatically
+- **Unified avatar** – The plugin photo (or a generated [DiceBear](https://www.dicebear.com/) avatar when none is set) is used everywhere WordPress renders an avatar — directory cards, profile pages, comments, author pages, and admin screens. Style is configurable in settings; avatar is seeded from the employee's display name
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates
 - **Conditional asset loading** – CSS and JS only load on pages that use the shortcode or the profile page
@@ -105,6 +105,7 @@ No custom database tables are created. All employee data is stored in the native
 |---|---|
 | `employee_dir_query_args` | Modify `WP_User_Query` arguments before the employee query runs. Receives `array $query_args, array $args`. |
 | `employee_dir_settings_defaults` | Override plugin setting defaults. Receives `array $defaults`. |
+| `pre_get_avatar_data` | Built-in WP filter — hooked by the plugin to substitute the plugin photo (or DiceBear fallback) for any WP avatar call site-wide. |
 
 ## File Structure
 
