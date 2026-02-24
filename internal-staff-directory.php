@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Internal Staff Directory
- * Plugin URI:        https://github.com/edwinkrisnha/Employee-Directory
+ * Plugin URI:        https://github.com/edwinkrisnha/Internal-Staff-Directory-Wordpress-Plugin
  * Description:       Internal employee directory for company intranet. Searchable staff profiles stored as user meta.
  * Version:           1.17.0
  * Author:            Edwin Krisnha
