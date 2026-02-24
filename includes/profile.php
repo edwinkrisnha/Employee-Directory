@@ -146,3 +146,85 @@ function employee_dir_get_departments() {
 function employee_dir_start_year_floor() {
 	return (int) gmdate( 'Y' ) - 10;
 }
+
+// ---------------------------------------------------------------------------
+// Avatar integration
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve a WP user ID from the mixed $id_or_email argument used by avatar hooks.
+ * Returns 0 when the value cannot be mapped to a known user (e.g. a Gravatar hash).
+ *
+ * @param int|string|WP_User|WP_Post|WP_Comment $id_or_email
+ * @return int
+ */
+function employee_dir_resolve_avatar_user_id( $id_or_email ) {
+	if ( is_numeric( $id_or_email ) ) {
+		return absint( $id_or_email );
+	}
+	if ( $id_or_email instanceof WP_User ) {
+		return $id_or_email->ID;
+	}
+	if ( $id_or_email instanceof WP_Post ) {
+		return (int) $id_or_email->post_author;
+	}
+	if ( $id_or_email instanceof WP_Comment ) {
+		return (int) $id_or_email->user_id;
+	}
+	if ( is_string( $id_or_email ) && is_email( $id_or_email ) ) {
+		$user = get_user_by( 'email', $id_or_email );
+		return $user ? $user->ID : 0;
+	}
+	return 0;
+}
+
+/**
+ * Override WP's avatar with the plugin's profile photo when one is stored.
+ * Hooked to pre_get_avatar_data so the plugin photo is used everywhere
+ * get_avatar() / get_avatar_url() is called — comments, author pages, etc.
+ *
+ * @param array                               $args        Avatar data args passed by WP.
+ * @param int|string|WP_User|WP_Post|WP_Comment $id_or_email
+ * @return array
+ */
+function employee_dir_avatar_data( $args, $id_or_email ) {
+	$user_id = employee_dir_resolve_avatar_user_id( $id_or_email );
+	if ( ! $user_id ) {
+		return $args;
+	}
+
+	$url = get_user_meta( $user_id, 'employee_dir_photo_url', true );
+	if ( $url ) {
+		$args['url']          = $url;
+		$args['found_avatar'] = true;
+	}
+
+	return $args;
+}
+add_filter( 'pre_get_avatar_data', 'employee_dir_avatar_data', 10, 2 );
+
+/**
+ * Return the display avatar URL for a directory employee.
+ *
+ * Priority: plugin photo → DiceBear (directory-only fallback).
+ * Use this in directory templates instead of bare get_avatar_url() so that the
+ * DiceBear setting is honoured even for users without a Gravatar account.
+ *
+ * @param WP_User $user
+ * @param int     $size Pixel size hint (passed to DiceBear seed only; plugin photo is always original size).
+ * @return string Already-escaped URL, safe to echo directly.
+ */
+function employee_dir_get_avatar_url( WP_User $user, $size = 64 ) {
+	$url = get_user_meta( $user->ID, 'employee_dir_photo_url', true );
+	if ( $url ) {
+		return esc_url( $url );
+	}
+
+	$settings  = employee_dir_get_settings();
+	$full_name = trim( $user->first_name . ' ' . $user->last_name );
+	if ( '' === $full_name ) {
+		$full_name = $user->display_name;
+	}
+
+	return esc_url( 'https://api.dicebear.com/9.x/' . $settings['dicebear_style'] . '/svg?seed=' . rawurlencode( $full_name ) );
+}

@@ -15,9 +15,7 @@ if ( '' === $full_name ) {
 	$full_name = $user->display_name;
 }
 
-$photo = ! empty( $profile['photo_url'] )
-	? esc_url( $profile['photo_url'] )
-	: get_avatar_url( $user->ID, [ 'size' => 128 ] );
+$photo = employee_dir_get_avatar_url( $user, 128 );
 
 // Back link: referrer if it's on the same site, otherwise omit.
 $back_url  = '';

@@ -8,6 +8,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 - `EMPLOYEE_DIR_VERSION` constant (`1.0.0`) was out of sync with the plugin header version (`1.17.0`), causing CSS/JS assets to be served with a stale cache-busting query string after updates. Constant is now set to `1.17.0`.
+- Avatar fallback mismatch: the directory card used DiceBear while the profile page used `get_avatar_url()`, so the same user could show two different placeholder images. Both templates now call a shared `employee_dir_get_avatar_url()` helper.
+
+### Added
+- `employee_dir_get_avatar_url( WP_User $user, int $size )` — canonical avatar resolver used by both directory templates. Returns the plugin photo when set, DiceBear otherwise.
+- `pre_get_avatar_data` filter (`employee_dir_avatar_data`) — when a plugin photo URL is stored, it now also overrides the WordPress avatar system everywhere `get_avatar()` / `get_avatar_url()` is called (comments, author pages, Gravatar, etc.).
 
 ### Changed
 - HR Staff list view now paginates at 50 users per page (prev/next navigation with total count) instead of loading all WordPress users in a single unbounded query.
