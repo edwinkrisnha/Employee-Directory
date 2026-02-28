@@ -19,6 +19,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Years at company** – Tenure displayed on cards; full start date shown on profile pages
 - **Send message quick action** – Configurable button on each card: Email, Microsoft Teams, or hidden
 - **Copy email** – Inline copy icon next to each email address; click to copy to clipboard, icon flashes green to confirm
+- **New hires spotlight** – `[employee_new_hires]` shortcode renders a card grid of employees who joined within the configurable **"New" badge window** (Settings → Internal Staff Directory). Sorted newest-first; no search or filter controls — use it as a homepage or sidebar widget
 - **Unified avatar** – The plugin photo (or a generated [DiceBear](https://www.dicebear.com/) avatar when none is set) is used everywhere WordPress renders an avatar — directory cards, profile pages, comments, author pages, and admin screens. Style is configurable in settings; avatar is seeded from the employee's display name
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates
@@ -48,6 +49,29 @@ Place the directory on any page or post:
 ```
 
 No attributes are required. The shortcode renders the full searchable directory with department filter.
+
+Optional attributes:
+
+| Attribute | Example | Description |
+|---|---|---|
+| `department` | `"Engineering"` | Lock the directory to one department; hides the department dropdown |
+| `per_page` | `10` | Override the results-per-page setting |
+| `role` | `"editor"` | Restrict results to a single WordPress role slug |
+
+### New hires shortcode
+
+Display only employees who joined within the configured **"New" badge window**:
+
+```
+[employee_new_hires]
+```
+
+| Attribute | Example | Description |
+|---|---|---|
+| `per_page` | `6` | Limit how many cards are shown (default: plugin setting) |
+| `role` | `"subscriber"` | Restrict to a single WordPress role slug |
+
+Results are sorted newest-first. The window is set via **Settings → Internal Staff Directory → "New" badge window**.
 
 ### Settings
 

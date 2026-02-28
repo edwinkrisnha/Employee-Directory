@@ -11,6 +11,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Avatar fallback mismatch: the directory card used DiceBear while the profile page used `get_avatar_url()`, so the same user could show two different placeholder images. Both templates now call a shared `employee_dir_get_avatar_url()` helper.
 
 ### Added
+- **`[employee_new_hires]` shortcode** — renders a card-grid spotlight of employees whose start date falls within the **"New" badge window** configured in Settings → Internal Staff Directory. Sorted newest-first by default. Accepts `per_page` and `role` attributes. No search or filter controls — intended as a sidebar or homepage widget.
+- `new_hires_only` arg in `employee_dir_get_employee_query()` — injects a `meta_query` clause filtering `employee_dir_start_date >= cutoff` (cutoff = today minus `new_hire_days`). Composable with existing `department`, `role__in`, and blocked-users filters.
 - `employee_dir_get_avatar_url( WP_User $user, int $size )` — canonical avatar resolver used by both directory templates. Thin wrapper around `get_avatar_url()` now that the filter handles all logic.
 - `pre_get_avatar_data` filter (`employee_dir_avatar_data`) — the plugin photo (or DiceBear fallback) now overrides the WordPress avatar system everywhere `get_avatar()` / `get_avatar_url()` is called (directory templates, comments, author pages, admin screens, etc.). Priority: plugin photo → DiceBear (seeded from display name, style from settings) → WP default for non-WP users (e.g. unregistered commenters).
 

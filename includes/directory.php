@@ -14,13 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Use this when you need both results and total count (e.g. for pagination).
  *
  * @param array $args {
- *   @type string   $search     Search term matched against name and email.
- *   @type string   $department Filter by exact department value.
- *   @type int      $per_page   Number of results. Default: value from plugin settings.
- *   @type int      $paged      Page number. Default 1.
- *   @type string   $sort       Sort key: name_asc|name_desc|start_date_desc|department_asc. Default 'name_asc'.
- *   @type string   $letter     First letter of display_name to filter by (A–Z). Overrides $search.
- *   @type string[] $role__in   Limit to specific roles; intersects with settings roles when both are set.
+ *   @type string   $search          Search term matched against name and email.
+ *   @type string   $department      Filter by exact department value.
+ *   @type int      $per_page        Number of results. Default: value from plugin settings.
+ *   @type int      $paged           Page number. Default 1.
+ *   @type string   $sort            Sort key: name_asc|name_desc|start_date_desc|department_asc. Default 'name_asc'.
+ *   @type string   $letter          First letter of display_name to filter by (A–Z). Overrides $search.
+ *   @type string[] $role__in        Limit to specific roles; intersects with settings roles when both are set.
+ *   @type bool     $new_hires_only  When true, only return users whose start date is within the new_hire_days window.
  * }
  * @return WP_User_Query
  */
@@ -28,13 +29,14 @@ function employee_dir_get_employee_query( array $args = [] ) {
 	$settings = employee_dir_get_settings();
 
 	$args = wp_parse_args( $args, [
-		'search'     => '',
-		'department' => '',
-		'per_page'   => $settings['per_page'],
-		'paged'      => 1,
-		'sort'       => 'name_asc',
-		'letter'     => '',
-		'role__in'   => [],
+		'search'         => '',
+		'department'     => '',
+		'per_page'       => $settings['per_page'],
+		'paged'          => 1,
+		'sort'           => 'name_asc',
+		'letter'         => '',
+		'role__in'       => [],
+		'new_hires_only' => false,
 	] );
 
 	// Resolve sort to WP_User_Query orderby/order/meta_key args.
@@ -87,6 +89,33 @@ function employee_dir_get_employee_query( array $args = [] ) {
 				'compare' => '=',
 			],
 		];
+	}
+
+	// New-hires filter: restrict to users whose start date is within the configured window.
+	if ( ! empty( $args['new_hires_only'] ) ) {
+		$new_hire_days = absint( $settings['new_hire_days'] );
+		if ( $new_hire_days > 0 ) {
+			// Advance to the first day of the next month so the cutoff aligns with how
+			// profile-card.php computes the badge (start_date normalized to YYYY-MM-01).
+			// e.g. 90 days back = Nov 30 → 'first day of next month' = Dec 1 → '2025-12',
+			// matching the card badge which treats '2025-12' as Dec 1 (89 days, within window).
+			$cutoff = ( new DateTime( 'today' ) )
+				->modify( "-{$new_hire_days} days" )
+				->modify( 'first day of next month' )
+				->format( 'Y-m' );
+			$new_hire_clause = [ // phpcs:ignore WordPress.DB.SlowDBQuery
+				'key'     => 'employee_dir_start_date',
+				'value'   => $cutoff,
+				'compare' => '>=',
+				'type'    => 'CHAR',
+			];
+			// Merge with any existing meta_query (e.g. department filter).
+			if ( isset( $query_args['meta_query'] ) ) {
+				$query_args['meta_query'][] = $new_hire_clause;
+			} else {
+				$query_args['meta_query'] = [ $new_hire_clause ]; // phpcs:ignore WordPress.DB.SlowDBQuery
+			}
+		}
 	}
 
 	// Exclude blocked users from every query.
@@ -257,6 +286,54 @@ function employee_dir_shortcode( $atts ) {
 }
 add_shortcode( 'employee_directory', 'employee_dir_shortcode' );
 
+/**
+ * [employee_new_hires] shortcode.
+ * Renders a card grid of employees whose start date falls within the
+ * new_hire_days window configured in Settings → Internal Staff Directory.
+ * No search or filter controls — intended as a spotlight widget.
+ *
+ * Attributes:
+ *   per_page (int)    – Max cards to show. Default: plugin settings value.
+ *   role     (string) – Restrict to a single WP role slug.
+ *
+ * @param array $atts Shortcode attributes.
+ * @return string HTML output.
+ */
+function employee_dir_new_hires_shortcode( $atts ) {
+	$atts = shortcode_atts( [
+		'per_page' => 0,
+		'role'     => '',
+	], $atts, 'employee_new_hires' );
+
+	$locked_per_page = absint( $atts['per_page'] );
+	$locked_role     = sanitize_text_field( $atts['role'] );
+
+	$settings = employee_dir_get_settings();
+
+	if ( $settings['require_login'] && ! is_user_logged_in() ) {
+		return '<p class="ed-no-results">' . esc_html__( 'You must be logged in to view the staff directory.', 'internal-staff-directory' ) . '</p>';
+	}
+
+	$query_args = [
+		'new_hires_only' => true,
+		'sort'           => 'start_date_desc',
+	];
+	if ( $locked_per_page > 0 ) {
+		$query_args['per_page'] = $locked_per_page;
+	}
+	if ( '' !== $locked_role ) {
+		$query_args['role__in'] = [ $locked_role ];
+	}
+
+	$employees      = employee_dir_get_employees( $query_args );
+	$visible_fields = $settings['visible_fields'];
+
+	ob_start();
+	include EMPLOYEE_DIR_PLUGIN_DIR . 'templates/new-hires.php';
+	return ob_get_clean();
+}
+add_shortcode( 'employee_new_hires', 'employee_dir_new_hires_shortcode' );
+
 // ---------------------------------------------------------------------------
 // AJAX handler
 // ---------------------------------------------------------------------------
@@ -331,7 +408,10 @@ add_action( 'wp_ajax_nopriv_employee_dir_search', 'employee_dir_ajax_search' );
 function employee_dir_enqueue_assets() {
 	global $post;
 
-	$is_directory = is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, 'employee_directory' );
+	$is_directory = is_a( $post, 'WP_Post' ) && (
+		has_shortcode( $post->post_content, 'employee_directory' ) ||
+		has_shortcode( $post->post_content, 'employee_new_hires' )
+	);
 	$is_profile   = (bool) get_query_var( 'ed_profile' );
 
 	if ( ! $is_directory && ! $is_profile ) {
