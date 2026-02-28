@@ -11,6 +11,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Avatar fallback mismatch: the directory card used DiceBear while the profile page used `get_avatar_url()`, so the same user could show two different placeholder images. Both templates now call a shared `employee_dir_get_avatar_url()` helper.
 
 ### Added
+- **New hire card fields setting** — a dedicated **"New hire card fields"** checkbox group in Settings → Internal Staff Directory controls which fields appear on `[employee_new_hires]` cards independently from the main directory's **"Visible card fields"** setting. Default: Department, Job Title, Start Date. Name, email, and photo are always visible.
 - **`[employee_new_hires]` shortcode** — renders a card-grid spotlight of employees whose start date falls within the **"New" badge window** configured in Settings → Internal Staff Directory. Sorted newest-first by default. Accepts `per_page` and `role` attributes. No search or filter controls — intended as a sidebar or homepage widget.
 - `new_hires_only` arg in `employee_dir_get_employee_query()` — injects a `meta_query` clause filtering `employee_dir_start_date >= cutoff` (cutoff = today minus `new_hire_days`). Composable with existing `department`, `role__in`, and blocked-users filters.
 - `employee_dir_get_avatar_url( WP_User $user, int $size )` — canonical avatar resolver used by both directory templates. Thin wrapper around `get_avatar_url()` now that the filter handles all logic.

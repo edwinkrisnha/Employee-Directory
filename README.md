@@ -19,7 +19,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Years at company** – Tenure displayed on cards; full start date shown on profile pages
 - **Send message quick action** – Configurable button on each card: Email, Microsoft Teams, or hidden
 - **Copy email** – Inline copy icon next to each email address; click to copy to clipboard, icon flashes green to confirm
-- **New hires spotlight** – `[employee_new_hires]` shortcode renders a card grid of employees who joined within the configurable **"New" badge window** (Settings → Internal Staff Directory). Sorted newest-first; no search or filter controls — use it as a homepage or sidebar widget
+- **New hires spotlight** – `[employee_new_hires]` shortcode renders a card grid of employees who joined within the configurable **"New" badge window** (Settings → Internal Staff Directory). Sorted newest-first; no search or filter controls — use it as a homepage or sidebar widget. Card fields are controlled independently via **New hire card fields** in settings
 - **Unified avatar** – The plugin photo (or a generated [DiceBear](https://www.dicebear.com/) avatar when none is set) is used everywhere WordPress renders an avatar — directory cards, profile pages, comments, author pages, and admin screens. Style is configurable in settings; avatar is seeded from the employee's display name
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates
@@ -87,6 +87,8 @@ Go to **Settings → Internal Staff Directory** to configure:
 | Department color stripe | On | Color-code each card's left border by department (auto-assigned) |
 | Send message platform | None | Show a quick-action button on cards: None, Email (mailto:), or Microsoft Teams |
 | Avatar fallback style | Big Smile | DiceBear style used when an employee has no profile photo — [31 styles available](https://www.dicebear.com/styles/) |
+| "New" badge window | 90 days | Employees who joined within this many days get a "New" badge. Set to 0 to disable |
+| New hire card fields | Department, Job Title, Start Date | Fields shown on `[employee_new_hires]` cards (independent from Visible card fields) |
 
 ### Profile Fields
 

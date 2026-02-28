@@ -326,7 +326,7 @@ function employee_dir_new_hires_shortcode( $atts ) {
 	}
 
 	$employees      = employee_dir_get_employees( $query_args );
-	$visible_fields = $settings['visible_fields'];
+	$visible_fields = $settings['new_hire_visible_fields'];
 
 	ob_start();
 	include EMPLOYEE_DIR_PLUGIN_DIR . 'templates/new-hires.php';

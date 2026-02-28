@@ -37,8 +37,9 @@ function employee_dir_get_settings() {
 		'dept_colors'      => 1,
 		'message_platform' => 'none',
 		'dicebear_style'   => 'big-smile',
-		'new_hire_days'    => 90,
-		'blocked_users'    => [],
+		'new_hire_days'           => 90,
+		'new_hire_visible_fields' => [ 'department', 'job_title', 'start_date' ],
+		'blocked_users'           => [],
 	] );
 
 	$saved = get_option( 'employee_dir_settings', [] );
@@ -158,6 +159,14 @@ function employee_dir_register_settings() {
 	);
 
 	add_settings_field(
+		'employee_dir_new_hire_visible_fields',
+		__( 'New hire card fields', 'internal-staff-directory' ),
+		'employee_dir_field_new_hire_visible_fields',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
+
+	add_settings_field(
 		'employee_dir_blocked_users',
 		__( 'Blocked users', 'internal-staff-directory' ),
 		'employee_dir_field_blocked_users',
@@ -242,6 +251,16 @@ function employee_dir_sanitize_settings( $input ) {
 	// new_hire_days: integer 0–365 (0 = feature disabled)
 	if ( isset( $input['new_hire_days'] ) ) {
 		$output['new_hire_days'] = min( 365, absint( $input['new_hire_days'] ) );
+	}
+
+	// new_hire_visible_fields: same whitelist as visible_fields
+	$output['new_hire_visible_fields'] = [];
+	if ( ! empty( $input['new_hire_visible_fields'] ) && is_array( $input['new_hire_visible_fields'] ) ) {
+		foreach ( $input['new_hire_visible_fields'] as $field ) {
+			if ( in_array( $field, $allowed_fields, true ) ) {
+				$output['new_hire_visible_fields'][] = $field;
+			}
+		}
 	}
 
 	// blocked_users: textarea of usernames/emails → stored as int[] of user IDs.
@@ -537,6 +556,44 @@ function employee_dir_field_new_hire_days() {
 	/>
 	<p class="description">
 		<?php esc_html_e( 'Employees who joined within this many days get a "New" badge on their card. Set to 0 to disable.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "New hire card fields" checkbox list.
+ */
+function employee_dir_field_new_hire_visible_fields() {
+	$settings       = employee_dir_get_settings();
+	$visible        = $settings['new_hire_visible_fields'];
+	$allowed_fields = [
+		'department'   => __( 'Department', 'internal-staff-directory' ),
+		'job_title'    => __( 'Job Title', 'internal-staff-directory' ),
+		'phone'        => __( 'Phone', 'internal-staff-directory' ),
+		'office'       => __( 'Office / Location', 'internal-staff-directory' ),
+		'bio'          => __( 'Bio', 'internal-staff-directory' ),
+		'linkedin_url' => __( 'LinkedIn URL', 'internal-staff-directory' ),
+		'start_date'   => __( 'Start Date / Years at company', 'internal-staff-directory' ),
+	];
+	?>
+	<fieldset>
+		<legend class="screen-reader-text">
+			<?php esc_html_e( 'New hire card fields', 'internal-staff-directory' ); ?>
+		</legend>
+		<?php foreach ( $allowed_fields as $key => $label ) : ?>
+			<label style="display:block; margin-bottom: 4px;">
+				<input
+					type="checkbox"
+					name="employee_dir_settings[new_hire_visible_fields][]"
+					value="<?php echo esc_attr( $key ); ?>"
+					<?php checked( in_array( $key, $visible, true ) ); ?>
+				/>
+				<?php echo esc_html( $label ); ?>
+			</label>
+		<?php endforeach; ?>
+	</fieldset>
+	<p class="description">
+		<?php esc_html_e( 'Which fields are shown on [employee_new_hires] cards. Name, email, and photo are always visible.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }
