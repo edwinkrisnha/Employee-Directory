@@ -206,8 +206,8 @@ function employee_dir_sanitize_settings( $input ) {
 		}
 	}
 
-	// visible_fields: whitelist against known text fields
-	$allowed_fields          = [ 'department', 'job_title', 'phone', 'office', 'bio', 'linkedin_url', 'start_date' ];
+	// visible_fields: whitelist against known text fields (including social)
+	$allowed_fields          = [ 'department', 'job_title', 'phone', 'office', 'bio', 'linkedin_url', 'start_date', 'whatsapp', 'telegram', 'discord', 'instagram', 'facebook', 'twitter', 'youtube', 'tiktok' ];
 	$output['visible_fields'] = [];
 	if ( ! empty( $input['visible_fields'] ) && is_array( $input['visible_fields'] ) ) {
 		foreach ( $input['visible_fields'] as $field ) {
@@ -356,6 +356,14 @@ function employee_dir_field_visible_fields() {
 		'bio'          => __( 'Bio', 'internal-staff-directory' ),
 		'linkedin_url' => __( 'LinkedIn URL', 'internal-staff-directory' ),
 		'start_date'   => __( 'Start Date / Years at company', 'internal-staff-directory' ),
+		'whatsapp'     => __( 'WhatsApp', 'internal-staff-directory' ),
+		'telegram'     => __( 'Telegram', 'internal-staff-directory' ),
+		'discord'      => __( 'Discord', 'internal-staff-directory' ),
+		'instagram'    => __( 'Instagram', 'internal-staff-directory' ),
+		'facebook'     => __( 'Facebook', 'internal-staff-directory' ),
+		'twitter'      => __( 'Twitter / X', 'internal-staff-directory' ),
+		'youtube'      => __( 'YouTube', 'internal-staff-directory' ),
+		'tiktok'       => __( 'TikTok', 'internal-staff-directory' ),
 	];
 	?>
 	<fieldset>
@@ -574,6 +582,14 @@ function employee_dir_field_new_hire_visible_fields() {
 		'bio'          => __( 'Bio', 'internal-staff-directory' ),
 		'linkedin_url' => __( 'LinkedIn URL', 'internal-staff-directory' ),
 		'start_date'   => __( 'Start Date / Years at company', 'internal-staff-directory' ),
+		'whatsapp'     => __( 'WhatsApp', 'internal-staff-directory' ),
+		'telegram'     => __( 'Telegram', 'internal-staff-directory' ),
+		'discord'      => __( 'Discord', 'internal-staff-directory' ),
+		'instagram'    => __( 'Instagram', 'internal-staff-directory' ),
+		'facebook'     => __( 'Facebook', 'internal-staff-directory' ),
+		'twitter'      => __( 'Twitter / X', 'internal-staff-directory' ),
+		'youtube'      => __( 'YouTube', 'internal-staff-directory' ),
+		'tiktok'       => __( 'TikTok', 'internal-staff-directory' ),
 	];
 	?>
 	<fieldset>

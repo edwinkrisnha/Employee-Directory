@@ -95,6 +95,28 @@ if ( $referrer && str_starts_with( $referrer, home_url() ) ) {
 				</div>
 			<?php endif; ?>
 
+			<?php
+			// Social links — respects per-user hide only; profile page ignores global visible_fields (existing behaviour).
+			$hidden_social = employee_dir_get_hidden_social_fields( $user->ID );
+			foreach ( employee_dir_social_fields() as $social_key ) :
+				if ( in_array( $social_key, $hidden_social, true ) ) continue;
+				if ( empty( $profile[ $social_key ] ) )              continue;
+				[ $social_url, $social_label ] = employee_dir_social_link( $social_key, $profile[ $social_key ] );
+			?>
+				<div class="ed-profile-page__detail-row">
+					<dt><?php echo esc_html( $social_label ); ?></dt>
+					<dd>
+						<?php if ( $social_url ) : ?>
+							<a href="<?php echo esc_url( $social_url ); ?>" target="_blank" rel="noopener noreferrer">
+								<?php echo esc_html( $profile[ $social_key ] ); ?>
+							</a>
+						<?php else : ?>
+							<?php echo esc_html( $profile[ $social_key ] ); // Discord: no link — display username ?>
+						<?php endif; ?>
+					</dd>
+				</div>
+			<?php endforeach; ?>
+
 			<?php if ( ! empty( $profile['start_date'] ) ) : ?>
 				<?php
 				$start_label  = esc_html( $profile['start_date'] );

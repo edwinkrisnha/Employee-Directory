@@ -110,7 +110,7 @@ function employee_dir_hr_parse_start_date_from_post( array $post_data ) {
  *               Sanitization is delegated to employee_dir_save_profile().
  */
 function employee_dir_hr_profile_data_from_post( array $post_data ) {
-	return [
+	$data = [
 		'department'   => isset( $post_data['ed_department'] )   ? wp_unslash( $post_data['ed_department'] )   : '',
 		'job_title'    => isset( $post_data['ed_job_title'] )    ? wp_unslash( $post_data['ed_job_title'] )    : '',
 		'phone'        => isset( $post_data['ed_phone'] )        ? wp_unslash( $post_data['ed_phone'] )        : '',
@@ -119,7 +119,25 @@ function employee_dir_hr_profile_data_from_post( array $post_data ) {
 		'photo_url'    => isset( $post_data['ed_photo_url'] )    ? wp_unslash( $post_data['ed_photo_url'] )    : '',
 		'linkedin_url' => isset( $post_data['ed_linkedin_url'] ) ? wp_unslash( $post_data['ed_linkedin_url'] ) : '',
 		'start_date'   => employee_dir_hr_parse_start_date_from_post( $post_data ),
+		// Social fields
+		'whatsapp'     => isset( $post_data['ed_whatsapp'] )     ? wp_unslash( $post_data['ed_whatsapp'] )     : '',
+		'telegram'     => isset( $post_data['ed_telegram'] )     ? wp_unslash( $post_data['ed_telegram'] )     : '',
+		'discord'      => isset( $post_data['ed_discord'] )      ? wp_unslash( $post_data['ed_discord'] )      : '',
+		'instagram'    => isset( $post_data['ed_instagram'] )    ? wp_unslash( $post_data['ed_instagram'] )    : '',
+		'facebook'     => isset( $post_data['ed_facebook'] )     ? wp_unslash( $post_data['ed_facebook'] )     : '',
+		'twitter'      => isset( $post_data['ed_twitter'] )      ? wp_unslash( $post_data['ed_twitter'] )      : '',
+		'youtube'      => isset( $post_data['ed_youtube'] )      ? wp_unslash( $post_data['ed_youtube'] )      : '',
+		'tiktok'       => isset( $post_data['ed_tiktok'] )       ? wp_unslash( $post_data['ed_tiktok'] )       : '',
 	];
+
+	// Collect hidden social fields: every social field NOT in ed_show_social[] is hidden.
+	$social_keys = employee_dir_social_fields();
+	$show_social = ( isset( $post_data['ed_show_social'] ) && is_array( $post_data['ed_show_social'] ) )
+		? array_map( 'sanitize_key', array_keys( $post_data['ed_show_social'] ) )
+		: [];
+	$data['hidden_social_fields'] = array_values( array_diff( $social_keys, $show_social ) );
+
+	return $data;
 }
 
 // ---------------------------------------------------------------------------
@@ -432,6 +450,11 @@ function employee_dir_hr_render_edit_view( $user_id ) {
 			</tr>
 		</table>
 
+		<?php
+		$hidden_social = employee_dir_get_hidden_social_fields( $user_id );
+		employee_dir_admin_render_social_fields( $profile, $hidden_social );
+		?>
+
 		<?php submit_button( __( 'Save Changes', 'internal-staff-directory' ) ); ?>
 	</form>
 	<?php
@@ -544,6 +567,11 @@ function employee_dir_hr_render_create_view() {
 				<td><textarea id="ed_bio" name="ed_bio" rows="4" class="large-text"></textarea></td>
 			</tr>
 		</table>
+
+		<?php
+		// New user: no hidden social fields yet — all default to visible (checked).
+		employee_dir_admin_render_social_fields( [], [] );
+		?>
 
 		<?php submit_button( __( 'Create Staff Member', 'internal-staff-directory' ) ); ?>
 	</form>

@@ -19,6 +19,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Years at company** – Tenure displayed on cards; full start date shown on profile pages
 - **Send message quick action** – Configurable button on each card: Email, Microsoft Teams, or hidden
 - **Copy email** – Inline copy icon next to each email address; click to copy to clipboard, icon flashes green to confirm
+- **Social & Contact fields** – Eight social/contact fields per employee (WhatsApp, Telegram, Discord, Instagram, Facebook, Twitter/X, YouTube, TikTok). Each user can show or hide individual fields from their WP Profile page. Social fields appear as a compact icon row on cards and as labeled links on profile pages
 - **New hires spotlight** – `[employee_new_hires]` shortcode renders a card grid of employees who joined within the configurable **"New" badge window** (Settings → Internal Staff Directory). Sorted newest-first; no search or filter controls — use it as a homepage or sidebar widget. Card fields are controlled independently via **New hire card fields** in settings
 - **Unified avatar** – The plugin photo (or a generated [DiceBear](https://www.dicebear.com/) avatar when none is set) is used everywhere WordPress renders an avatar — directory cards, profile pages, comments, author pages, and admin screens. Style is configurable in settings; avatar is seeded from the employee's display name
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
@@ -104,6 +105,16 @@ Each WordPress user gains eight additional fields on their profile page (under *
 | Profile Photo URL | `employee_dir_photo_url` | Direct URL to a profile photo |
 | LinkedIn URL | `employee_dir_linkedin_url` | Full LinkedIn profile URL |
 | Start Date | `employee_dir_start_date` | Month/year joined (YYYY-MM); shown as tenure on cards |
+| WhatsApp | `employee_dir_whatsapp` | Phone number with country code; links to `wa.me` |
+| Telegram | `employee_dir_telegram` | Username or phone; links to `t.me` |
+| Discord | `employee_dir_discord` | Username (display only — no universal link) |
+| Instagram | `employee_dir_instagram` | Username; links to `instagram.com` |
+| Facebook | `employee_dir_facebook` | Full profile URL |
+| Twitter / X | `employee_dir_twitter` | Username; links to `x.com` |
+| YouTube | `employee_dir_youtube` | Full channel URL |
+| TikTok | `employee_dir_tiktok` | Username; links to `tiktok.com/@` |
+
+Each user controls per-field visibility from their WP Profile page via **"Show in directory"** checkboxes. Stored as `employee_dir_hidden_social_fields` usermeta.
 
 Users with the `edit_user` capability can edit these fields. Employees can update their own fields from the **Profile** screen.
 

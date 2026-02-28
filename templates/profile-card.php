@@ -123,6 +123,40 @@ if ( $new_hire_days > 0 && ! empty( $profile['start_date'] ) ) {
 		<?php endif; ?>
 
 		<?php
+		// Social icon row — only fields enabled in settings AND not hidden by the user.
+		$hidden_social  = employee_dir_get_hidden_social_fields( $user->ID );
+		$social_visible = [];
+		foreach ( employee_dir_social_fields() as $social_key ) {
+			if ( ! in_array( $social_key, $visible_fields, true ) )   continue; // global setting
+			if ( in_array( $social_key, $hidden_social, true ) )       continue; // per-user hide
+			if ( empty( $profile[ $social_key ] ) )                    continue; // no value
+			$social_visible[ $social_key ] = $profile[ $social_key ];
+		}
+		if ( $social_visible ) :
+		?>
+		<div class="ed-card__social-links">
+			<?php foreach ( $social_visible as $social_key => $social_value ) :
+				[ $social_url, $social_label ] = employee_dir_social_link( $social_key, $social_value );
+				if ( $social_url ) : ?>
+					<a
+						href="<?php echo esc_url( $social_url ); ?>"
+						class="ed-card__social-link ed-card__social-link--<?php echo esc_attr( $social_key ); ?>"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="<?php echo esc_attr( $social_label ); ?>"
+					><?php echo employee_dir_social_icon_svg( $social_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded SVG, no user input ?></a>
+				<?php elseif ( 'discord' === $social_key ) : ?>
+					<span
+						class="ed-card__social-link ed-card__social-link--discord"
+						title="<?php echo esc_attr( $social_label . ': ' . $social_value ); ?>"
+						aria-label="<?php echo esc_attr( $social_label . ': ' . $social_value ); ?>"
+					><?php echo employee_dir_social_icon_svg( $social_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+				<?php endif; ?>
+			<?php endforeach; ?>
+		</div>
+		<?php endif; ?>
+
+		<?php
 		$tenure = ! empty( $profile['start_date'] ) ? employee_dir_years_at_company( $profile['start_date'] ) : '';
 		if ( $tenure && in_array( 'start_date', $visible_fields, true ) ) :
 		?>

@@ -15,12 +15,14 @@ function employee_dir_show_extra_profile_fields( $user ) {
 		return;
 	}
 
-	$profile = employee_dir_get_profile( $user->ID );
-	$fields  = employee_dir_fields();
+	$profile       = employee_dir_get_profile( $user->ID );
+	$fields        = employee_dir_fields();
+	$social_keys   = employee_dir_social_fields();
 	?>
 	<h2><?php esc_html_e( 'Employee Directory', 'internal-staff-directory' ); ?></h2>
 	<table class="form-table" role="presentation">
 		<?php foreach ( $fields as $key => $label ) : ?>
+		<?php if ( in_array( $key, $social_keys, true ) ) continue; // rendered in the Social section below ?>
 		<tr>
 			<th scope="row">
 				<label for="<?php echo 'start_date' === $key ? 'ed_start_month' : 'ed_' . esc_attr( $key ); ?>">
@@ -105,6 +107,11 @@ function employee_dir_show_extra_profile_fields( $user ) {
 		</tr>
 		<?php endforeach; ?>
 	</table>
+
+	<?php
+	$hidden_social = employee_dir_get_hidden_social_fields( $user->ID );
+	employee_dir_admin_render_social_fields( $profile, $hidden_social );
+	?>
 	<?php
 }
 add_action( 'show_user_profile', 'employee_dir_show_extra_profile_fields' );
@@ -135,10 +142,96 @@ function employee_dir_save_extra_profile_fields( $user_id ) {
 		}
 	}
 
+	// Collect hidden social fields: every social field NOT in ed_show_social[] is hidden.
+	$social_keys  = employee_dir_social_fields();
+	$show_social  = ( isset( $_POST['ed_show_social'] ) && is_array( $_POST['ed_show_social'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		? array_map( 'sanitize_key', array_keys( $_POST['ed_show_social'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		: [];
+	$data['hidden_social_fields'] = array_values( array_diff( $social_keys, $show_social ) );
+
 	employee_dir_save_profile( $user_id, $data );
 }
 add_action( 'personal_options_update',  'employee_dir_save_extra_profile_fields' );
 add_action( 'edit_user_profile_update', 'employee_dir_save_extra_profile_fields' );
+
+// ---------------------------------------------------------------------------
+// Social & Contact fields shared renderer
+// ---------------------------------------------------------------------------
+
+/**
+ * Render the Social & Contact fields section (inputs + per-field show/hide toggles).
+ * Used by the WP profile screen and the HR Staff tab edit/create views.
+ *
+ * @param array    $profile       Current profile meta values (keyed by field key).
+ * @param string[] $hidden_social Field keys the user has chosen to hide (empty = nothing hidden).
+ */
+function employee_dir_admin_render_social_fields( array $profile, array $hidden_social ) {
+	$url_fields  = [ 'facebook', 'youtube' ];   // stored as full URLs
+	$hints       = [
+		'whatsapp'  => __( 'Number with country code, e.g. +12025551234', 'internal-staff-directory' ),
+		'telegram'  => __( 'Username or phone, e.g. @handle or +12025551234', 'internal-staff-directory' ),
+		'discord'   => __( 'Username, e.g. username or username#1234', 'internal-staff-directory' ),
+		'instagram' => __( 'Username, e.g. @handle', 'internal-staff-directory' ),
+		'facebook'  => __( 'Full profile URL, e.g. https://facebook.com/yourname', 'internal-staff-directory' ),
+		'twitter'   => __( 'Username, e.g. @handle', 'internal-staff-directory' ),
+		'youtube'   => __( 'Channel URL, e.g. https://youtube.com/@yourchannel', 'internal-staff-directory' ),
+		'tiktok'    => __( 'Username, e.g. @handle', 'internal-staff-directory' ),
+	];
+	$labels      = [
+		'whatsapp'  => __( 'WhatsApp', 'internal-staff-directory' ),
+		'telegram'  => __( 'Telegram', 'internal-staff-directory' ),
+		'discord'   => __( 'Discord', 'internal-staff-directory' ),
+		'instagram' => __( 'Instagram', 'internal-staff-directory' ),
+		'facebook'  => __( 'Facebook', 'internal-staff-directory' ),
+		'twitter'   => __( 'Twitter / X', 'internal-staff-directory' ),
+		'youtube'   => __( 'YouTube', 'internal-staff-directory' ),
+		'tiktok'    => __( 'TikTok', 'internal-staff-directory' ),
+	];
+	?>
+	<h2><?php esc_html_e( 'Social & Contact', 'internal-staff-directory' ); ?></h2>
+	<p class="description" style="margin-bottom:1rem;">
+		<?php esc_html_e( 'Uncheck "Show in directory" to hide a field from the staff directory card and profile page.', 'internal-staff-directory' ); ?>
+	</p>
+	<table class="form-table" role="presentation">
+		<?php foreach ( employee_dir_social_fields() as $key ) :
+			$is_url  = in_array( $key, $url_fields, true );
+			$value   = $profile[ $key ] ?? '';
+			$is_visible = ! in_array( $key, $hidden_social, true );
+		?>
+		<tr>
+			<th scope="row">
+				<label for="ed_<?php echo esc_attr( $key ); ?>">
+					<?php echo esc_html( $labels[ $key ] ); ?>
+				</label>
+			</th>
+			<td>
+				<input
+					type="<?php echo $is_url ? 'url' : 'text'; ?>"
+					id="ed_<?php echo esc_attr( $key ); ?>"
+					name="ed_<?php echo esc_attr( $key ); ?>"
+					value="<?php echo esc_attr( $value ); ?>"
+					class="regular-text"
+					placeholder="<?php echo $is_url ? 'https://' : ''; ?>"
+				/>
+				<br>
+				<label style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;">
+					<input
+						type="checkbox"
+						name="ed_show_social[<?php echo esc_attr( $key ); ?>]"
+						value="1"
+						<?php checked( $is_visible ); ?>
+					/>
+					<?php esc_html_e( 'Show in directory', 'internal-staff-directory' ); ?>
+				</label>
+				<?php if ( ! empty( $hints[ $key ] ) ) : ?>
+					<p class="description"><?php echo esc_html( $hints[ $key ] ); ?></p>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php endforeach; ?>
+	</table>
+	<?php
+}
 
 // ---------------------------------------------------------------------------
 // Media library uploader + server-side square crop for profile photo
