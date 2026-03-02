@@ -21,7 +21,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Copy email** – Inline copy icon next to each email address; click to copy to clipboard, icon flashes green to confirm
 - **Social & Contact fields** – Eight social/contact fields per employee (WhatsApp, Telegram, Discord, Instagram, Facebook, Twitter/X, YouTube, TikTok). Each user can show or hide individual fields from their WP Profile page. Social fields appear as a compact icon row on cards and as labeled links on profile pages
 - **New hires spotlight** – `[employee_new_hires]` shortcode renders a card grid of employees who joined within the configurable **"New" badge window** (Settings → Internal Staff Directory). Sorted newest-first; no search or filter controls — use it as a homepage or sidebar widget. Card fields are controlled independently via **New hire card fields** in settings
-- **Birthday spotlight** – `[employee_birthdays]` shortcode renders a card grid of employees whose birthday falls within a configurable day window relative to today. Shows "Today!", "In X days", or "X days ago" badge on each card. Cross-year boundaries handled correctly. Window defaults set in settings; overridable per shortcode
+- **Birthday spotlight** – `[employee_birthdays]` shortcode renders a festive horizontal-scroll carousel of employees whose birthday falls within a configurable day window relative to today. Each portrait card shows a circular photo, name, job title, department, formatted birthday date, and a pill label ("🎂 Today!" / "🎈 In X days"). Cards cycle through five gradient color themes; "Today" cards glow gold with a pulsing photo ring. Cross-year boundaries handled correctly. Window defaults set in settings; overridable per shortcode
 - **Unified avatar** – The plugin photo (or a generated [DiceBear](https://www.dicebear.com/) avatar when none is set) is used everywhere WordPress renders an avatar — directory cards, profile pages, comments, author pages, and admin screens. Style is configurable in settings; avatar is seeded from the employee's display name
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
 - **Accessibility-first** – ARIA labels, screen reader text, and live regions for dynamic updates
@@ -89,7 +89,9 @@ Display employees whose birthday (month and day) falls within a configurable win
 | `days_after` | `7` | Include birthdays up to this many days ahead (default: plugin setting) |
 | `role` | `"subscriber"` | Restrict to a single WordPress role slug |
 
-Cards are sorted with today's birthdays first, then upcoming, then past. Each card shows a "Today!", "In X days", or "X days ago" badge. Window defaults are set via **Settings → Internal Staff Directory → Birthday window**. Per-shortcode attributes override those defaults.
+Results are displayed as a horizontal-scroll carousel. Each portrait card shows a circular photo, name (linked to the profile page), job title, department, formatted birthday date (e.g. "March 15" — only when Birthday is enabled in Visible card fields), and a pill label: "🎂 Today!", "🎈 In X days", or "X days ago". Cards are sorted today-first, then upcoming, then past. "Today" cards get a gold gradient, animated glow, and pulsing photo ring.
+
+Window defaults are set via **Settings → Internal Staff Directory → Birthday window**. Per-shortcode attributes override those defaults.
 
 ### Settings
 

@@ -752,6 +752,8 @@ span.ed-card__social-link {
 
 .ed-bday-carousel {
 	display: flex;
+	justify-content: center;        /* fallback: centers when content fits */
+	justify-content: safe center;   /* modern: won't clip start when overflowing */
 	gap: 1rem;
 	overflow-x: auto;
 	scroll-snap-type: x mandatory;
@@ -865,7 +867,6 @@ span.ed-card__social-link {
 	object-fit: cover;
 	display: block;
 	max-width: none;
-	background: rgba(255, 255, 255, 0.20);
 }
 
 @keyframes ed-bday-ring-pulse {

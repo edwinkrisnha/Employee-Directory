@@ -19,7 +19,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.21.0] — 2026-03-02
 
 ### Changed
-- **`[employee_birthdays]` redesign** — replaced the plain grid layout (which reused the same `profile-card.php` as the main directory) with a fully custom festive horizontal-scroll carousel. Each person gets a portrait card with: large circular photo with animated ring, name linked to profile page, job title, department, formatted birthday date (e.g. "March 15" — respects the `birth_date` visible-fields setting), and a pill label ("🎂 Today!" / "🎈 In 3 days"). Five rotating gradient color themes cycle across cards. "Today" cards receive a gold gradient, a subtle scale-up, a pulsing photo ring, and an animated ✨ sparkle badge. Empty state shows a 🎈 balloon with a friendly message.
+- **`[employee_birthdays]` redesign** — replaced the plain grid layout (which reused the same `profile-card.php` as the main directory) with a fully custom festive horizontal-scroll carousel. Each person gets a portrait card with: large circular photo with animated ring, name linked to profile page, job title, department, formatted birthday date (e.g. "March 15" — respects the `birth_date` visible-fields setting), and a pill label ("🎂 Today!" / "🎈 In 3 days"). Five rotating gradient color themes cycle across cards via `:nth-child`. "Today" cards receive a gold gradient, a subtle scale-up, a pulsing photo ring, and an animated ✨ sparkle badge. Empty state shows a 🎈 balloon with a friendly message.
+- **Birthday carousel centering** — switched from `width: fit-content` (which incorrectly clipped cards when combined with `overflow-x: auto`) to `justify-content: safe center` so the carousel centers naturally when few cards fit, and scrolls correctly when cards overflow, without clipping the leading card.
+- **Birthday card photo** — removed the semi-transparent white background fill from `.ed-bday-card__photo`; avatars now render cleanly against each card's gradient.
 
 ## [Unreleased]
 
