@@ -85,6 +85,64 @@ function employee_dir_hr_render_start_date_selects( $saved_month, $saved_year ) 
 }
 
 /**
+ * Render the month + day dropdowns for the birth date field.
+ * Used by both the edit and create views.
+ *
+ * @param string $saved_month Two-digit saved month, e.g. '03'. Empty string if unset.
+ * @param string $saved_day   Two-digit saved day, e.g. '15'. Empty string if unset.
+ */
+function employee_dir_hr_render_birth_date_selects( $saved_month, $saved_day ) {
+	$months = [
+		'01' => __( 'January',   'internal-staff-directory' ),
+		'02' => __( 'February',  'internal-staff-directory' ),
+		'03' => __( 'March',     'internal-staff-directory' ),
+		'04' => __( 'April',     'internal-staff-directory' ),
+		'05' => __( 'May',       'internal-staff-directory' ),
+		'06' => __( 'June',      'internal-staff-directory' ),
+		'07' => __( 'July',      'internal-staff-directory' ),
+		'08' => __( 'August',    'internal-staff-directory' ),
+		'09' => __( 'September', 'internal-staff-directory' ),
+		'10' => __( 'October',   'internal-staff-directory' ),
+		'11' => __( 'November',  'internal-staff-directory' ),
+		'12' => __( 'December',  'internal-staff-directory' ),
+	];
+	?>
+	<select name="ed_birth_month" id="ed_birth_month">
+		<option value=""><?php esc_html_e( '— Month —', 'internal-staff-directory' ); ?></option>
+		<?php foreach ( $months as $num => $name ) : ?>
+			<option value="<?php echo esc_attr( $num ); ?>" <?php selected( $saved_month, $num ); ?>>
+				<?php echo esc_html( $name ); ?>
+			</option>
+		<?php endforeach; ?>
+	</select>
+	<select name="ed_birth_day" id="ed_birth_day" style="margin-left:6px;">
+		<option value=""><?php esc_html_e( '— Day —', 'internal-staff-directory' ); ?></option>
+		<?php for ( $d = 1; $d <= 31; $d++ ) : ?>
+			<option value="<?php echo esc_attr( sprintf( '%02d', $d ) ); ?>" <?php selected( $saved_day, sprintf( '%02d', $d ) ); ?>>
+				<?php echo esc_html( $d ); ?>
+			</option>
+		<?php endfor; ?>
+	</select>
+	<?php
+}
+
+/**
+ * Parse the birth date from POST data.
+ * Reads ed_birth_month + ed_birth_day, validates, and returns 'MM-DD' or ''.
+ *
+ * @param array $post_data Raw POST array (typically $_POST).
+ * @return string
+ */
+function employee_dir_hr_parse_birth_date_from_post( array $post_data ) {
+	$month = isset( $post_data['ed_birth_month'] ) ? absint( $post_data['ed_birth_month'] ) : 0;
+	$day   = isset( $post_data['ed_birth_day'] )   ? absint( $post_data['ed_birth_day'] )   : 0;
+	if ( $month < 1 || $month > 12 || $day < 1 || $day > 31 ) {
+		return '';
+	}
+	return employee_dir_sanitize_birth_date( sprintf( '%02d-%02d', $month, $day ) );
+}
+
+/**
  * Parse the start date from POST data.
  * Reads ed_start_year + ed_start_month, validates, and returns 'YYYY-MM' or ''.
  *
@@ -119,6 +177,7 @@ function employee_dir_hr_profile_data_from_post( array $post_data ) {
 		'photo_url'    => isset( $post_data['ed_photo_url'] )    ? wp_unslash( $post_data['ed_photo_url'] )    : '',
 		'linkedin_url' => isset( $post_data['ed_linkedin_url'] ) ? wp_unslash( $post_data['ed_linkedin_url'] ) : '',
 		'start_date'   => employee_dir_hr_parse_start_date_from_post( $post_data ),
+		'birth_date'   => employee_dir_hr_parse_birth_date_from_post( $post_data ),
 		// Social fields
 		'whatsapp'     => isset( $post_data['ed_whatsapp'] )     ? wp_unslash( $post_data['ed_whatsapp'] )     : '',
 		'telegram'     => isset( $post_data['ed_telegram'] )     ? wp_unslash( $post_data['ed_telegram'] )     : '',
@@ -454,6 +513,21 @@ function employee_dir_hr_render_edit_view( $user_id ) {
 				</td>
 			</tr>
 			<tr>
+				<?php
+				$saved_bmonth = '';
+				$saved_bday   = '';
+				if ( preg_match( '/^(\d{2})-(\d{2})$/', $profile['birth_date'], $bm ) ) {
+					$saved_bmonth = $bm[1];
+					$saved_bday   = $bm[2];
+				}
+				?>
+				<th scope="row"><label for="ed_birth_month"><?php esc_html_e( 'Birthday', 'internal-staff-directory' ); ?></label></th>
+				<td>
+					<?php employee_dir_hr_render_birth_date_selects( $saved_bmonth, $saved_bday ); ?>
+					<p class="description"><?php esc_html_e( 'Month and day only — year is not stored.', 'internal-staff-directory' ); ?></p>
+				</td>
+			</tr>
+			<tr>
 				<th scope="row"><label for="ed_bio"><?php esc_html_e( 'Bio', 'internal-staff-directory' ); ?></label></th>
 				<td><textarea id="ed_bio" name="ed_bio" rows="4" class="large-text"><?php echo esc_textarea( $profile['bio'] ); ?></textarea></td>
 			</tr>
@@ -570,6 +644,13 @@ function employee_dir_hr_render_create_view() {
 				<td>
 					<?php employee_dir_hr_render_start_date_selects( '', '' ); ?>
 					<p class="description"><?php esc_html_e( 'The month this employee joined the company.', 'internal-staff-directory' ); ?></p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="ed_birth_month"><?php esc_html_e( 'Birthday', 'internal-staff-directory' ); ?></label></th>
+				<td>
+					<?php employee_dir_hr_render_birth_date_selects( '', '' ); ?>
+					<p class="description"><?php esc_html_e( 'Month and day only — year is not stored.', 'internal-staff-directory' ); ?></p>
 				</td>
 			</tr>
 			<tr>
