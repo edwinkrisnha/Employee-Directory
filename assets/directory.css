@@ -710,3 +710,265 @@
 span.ed-card__social-link {
 	cursor: default;
 }
+
+/* ==========================================================================
+   Birthday spotlight widget — [employee_birthdays] shortcode
+   ========================================================================== */
+
+.ed-birthdays {
+	max-width: 1100px;
+	margin: 0 auto;
+	font-family: inherit;
+}
+
+/* ---- Header ornament ---- */
+
+.ed-birthdays__header {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	margin-bottom: 1.25rem;
+}
+
+.ed-birthdays__ornament {
+	display: inline-block;
+	width: 48px;
+	height: 2px;
+	border-radius: 999px;
+	background: linear-gradient(to right, transparent, #e2e8f0);
+}
+
+.ed-birthdays__ornament:last-child {
+	background: linear-gradient(to left, transparent, #e2e8f0);
+}
+
+.ed-birthdays__icon {
+	font-size: 1.5rem;
+	line-height: 1;
+}
+
+/* ---- Carousel track ---- */
+
+.ed-bday-carousel {
+	display: flex;
+	gap: 1rem;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	-webkit-overflow-scrolling: touch;
+	padding: 0.75rem 0.25rem 1.5rem;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 transparent;
+}
+
+.ed-bday-carousel::-webkit-scrollbar {
+	height: 4px;
+}
+
+.ed-bday-carousel::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.ed-bday-carousel::-webkit-scrollbar-thumb {
+	background: #cbd5e1;
+	border-radius: 999px;
+}
+
+/* ---- Individual birthday card ---- */
+
+.ed-bday-card {
+	flex: 0 0 156px;
+	scroll-snap-align: start;
+	border-radius: 18px;
+	padding: 1.25rem 1rem 1rem;
+	text-align: center;
+	color: #fff;
+	background: linear-gradient(155deg, #6366f1 0%, #8b5cf6 100%);
+	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	position: relative;
+	overflow: hidden;
+}
+
+.ed-bday-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+/* Subtle radial glow in top-right corner */
+.ed-bday-card::before {
+	content: '';
+	position: absolute;
+	top: -30%;
+	right: -20%;
+	width: 120px;
+	height: 120px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.12);
+	pointer-events: none;
+}
+
+/* 5 rotating gradient themes */
+.ed-bday-card:nth-child(5n + 1) { background: linear-gradient(155deg, #6366f1 0%, #8b5cf6 100%); }
+.ed-bday-card:nth-child(5n + 2) { background: linear-gradient(155deg, #ec4899 0%, #f97316 100%); }
+.ed-bday-card:nth-child(5n + 3) { background: linear-gradient(155deg, #0ea5e9 0%, #3b82f6 100%); }
+.ed-bday-card:nth-child(5n + 4) { background: linear-gradient(155deg, #10b981 0%, #0891b2 100%); }
+.ed-bday-card:nth-child(5n + 5) { background: linear-gradient(155deg, #f59e0b 0%, #ef4444 100%); }
+
+/* ---- "Today" card override ---- */
+
+.ed-bday-card.ed-bday-card--today {
+	background: linear-gradient(155deg, #fbbf24 0%, #f59e0b 100%);
+	box-shadow: 0 6px 28px rgba(251, 191, 36, 0.50);
+	transform: scale(1.05);
+}
+
+.ed-bday-card.ed-bday-card--today:hover {
+	transform: scale(1.05) translateY(-4px);
+}
+
+/* ---- Sparkle badge (today only) ---- */
+
+.ed-bday-card__sparkle {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	font-size: 1rem;
+	line-height: 1;
+	animation: ed-bday-sparkle 1.6s ease-in-out infinite;
+}
+
+@keyframes ed-bday-sparkle {
+	0%, 100% { opacity: 1;   transform: scale(1)   rotate(0deg);  }
+	50%       { opacity: 0.6; transform: scale(1.3) rotate(15deg); }
+}
+
+/* ---- Photo ring ---- */
+
+.ed-bday-card__photo-wrap {
+	width: 84px;
+	height: 84px;
+	border-radius: 50%;
+	padding: 3px;
+	background: rgba(255, 255, 255, 0.30);
+	flex-shrink: 0;
+}
+
+.ed-bday-card__photo {
+	width: 78px;
+	height: 78px;
+	border-radius: 50%;
+	object-fit: cover;
+	display: block;
+	max-width: none;
+	background: rgba(255, 255, 255, 0.20);
+}
+
+@keyframes ed-bday-ring-pulse {
+	0%, 100% { background: rgba(255, 255, 255, 0.30); }
+	50%       { background: rgba(255, 255, 255, 0.65); }
+}
+
+.ed-bday-card.ed-bday-card--today .ed-bday-card__photo-wrap {
+	animation: ed-bday-ring-pulse 2s ease-in-out infinite;
+}
+
+/* ---- Card body ---- */
+
+.ed-bday-card__body {
+	flex: 1;
+	width: 100%;
+}
+
+.ed-bday-card__name {
+	margin: 0 0 0.2rem;
+	font-size: 0.875rem;
+	font-weight: 700;
+	line-height: 1.3;
+	word-break: break-word;
+}
+
+.ed-bday-card__name a {
+	color: #fff;
+	text-decoration: none;
+}
+
+.ed-bday-card__name a:hover {
+	text-decoration: underline;
+}
+
+.ed-bday-card__title {
+	margin: 0 0 0.15rem;
+	font-size: 0.72rem;
+	color: rgba(255, 255, 255, 0.85);
+	line-height: 1.35;
+}
+
+.ed-bday-card__dept {
+	margin: 0 0 0.15rem;
+	font-size: 0.65rem;
+	color: rgba(255, 255, 255, 0.65);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	font-weight: 600;
+}
+
+.ed-bday-card__date {
+	margin: 0.15rem 0 0;
+	font-size: 0.72rem;
+	color: rgba(255, 255, 255, 0.80);
+	font-style: italic;
+}
+
+/* ---- Footer label pill ---- */
+
+.ed-bday-card__footer {
+	width: 100%;
+	margin-top: auto;
+}
+
+.ed-bday-card__label {
+	display: inline-block;
+	padding: 0.3em 0.75em;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	background: rgba(0, 0, 0, 0.20);
+	color: #fff;
+	white-space: nowrap;
+}
+
+.ed-bday-card__label.ed-bday-card__label--today {
+	background: rgba(255, 255, 255, 0.35);
+}
+
+/* ---- Empty state ---- */
+
+.ed-bday-empty {
+	text-align: center;
+	padding: 3rem 1rem;
+	color: #94a3b8;
+}
+
+.ed-bday-empty__icon {
+	display: block;
+	font-size: 2.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.ed-bday-empty p {
+	margin: 0;
+	font-size: 0.95rem;
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 480px) {
+	.ed-bday-card {
+		flex: 0 0 140px;
+	}
+}
