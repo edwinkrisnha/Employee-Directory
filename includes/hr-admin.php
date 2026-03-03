@@ -825,6 +825,9 @@ function employee_dir_hr_handle_remove_user() {
 	$settings['blocked_users'] = array_values( array_unique( $blocked ) );
 	update_option( 'employee_dir_settings', $settings );
 
+	// Immediately terminate all active sessions so the user is logged out right away.
+	WP_Session_Tokens::get_instance( $user_id )->destroy_all();
+
 	wp_redirect( employee_dir_hr_tab_url( [ 'removed' => 1 ] ) );
 	exit;
 }
@@ -861,6 +864,34 @@ function employee_dir_hr_handle_restore_user() {
 	exit;
 }
 add_action( 'admin_post_employee_dir_hr_restore_user', 'employee_dir_hr_handle_restore_user' );
+
+// ---------------------------------------------------------------------------
+// Login blocking
+// ---------------------------------------------------------------------------
+
+/**
+ * Prevent blocked (removed) users from logging in.
+ *
+ * Fires after credentials are validated so the error is specific to account
+ * status rather than incorrect credentials. Returning a WP_Error here aborts
+ * the login and displays the message on the login form.
+ *
+ * @param WP_User|WP_Error $user The authenticated user object, or an error.
+ * @return WP_User|WP_Error
+ */
+function employee_dir_block_removed_user_login( $user ) {
+	if ( ! ( $user instanceof WP_User ) ) {
+		return $user;
+	}
+	if ( employee_dir_hr_is_user_blocked( $user->ID ) ) {
+		return new WP_Error(
+			'employee_dir_blocked',
+			__( 'Your account has been deactivated. Please contact your administrator.', 'internal-staff-directory' )
+		);
+	}
+	return $user;
+}
+add_filter( 'wp_authenticate_user', 'employee_dir_block_removed_user_login' );
 
 // ---------------------------------------------------------------------------
 // Asset enqueueing

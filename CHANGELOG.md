@@ -16,6 +16,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `employee_dir_format_birthday_label( $offset )` — returns "Today!", "In X days", or "X days ago" from an integer day offset.
 - `employee_dir_get_birthday_employees( $days_before, $days_after, $extra_args )` — fetches all users with a `birth_date` set, PHP-filters to the window (cross-year boundary safe), and returns sorted `[user, offset, profile]` entries.
 
+## [1.22.0] — 2026-03-03
+
+### Added
+- **Login blocking for removed users** — users in the "Removed" state (blocked list) can no longer log in to WordPress. A `wp_authenticate_user` filter returns a `WP_Error` after credential validation, displaying "Your account has been deactivated. Please contact your administrator." on the login form. Restoring the user immediately re-enables login with no account mutation.
+- **Immediate session termination on remove** — when a user is removed from the directory via the HR Staff tab, all their active WordPress sessions are destroyed on the spot via `WP_Session_Tokens::destroy_all()`, so they are logged out immediately rather than at next session expiry.
+
 ## [1.21.1] — 2026-03-03
 
 ### Fixed
