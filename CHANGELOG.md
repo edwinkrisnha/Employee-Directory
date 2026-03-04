@@ -16,6 +16,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `employee_dir_format_birthday_label( $offset )` — returns "Today!", "In X days", or "X days ago" from an integer day offset.
 - `employee_dir_get_birthday_employees( $days_before, $days_after, $extra_args )` — fetches all users with a `birth_date` set, PHP-filters to the window (cross-year boundary safe), and returns sorted `[user, offset, profile]` entries.
 
+## [1.24.0] — 2026-03-04
+
+### Added
+- **Multiple emails per staff member** — each employee can now store any number of additional email addresses alongside their primary login email. Each additional email has a free-text label (e.g. "Work", "Personal"). Stored as a serialized array in `employee_dir_extra_emails` usermeta.
+- **Additional Emails section in admin forms** — a dynamic add/remove UI (powered by inline jQuery) appears on both the WP user edit screen and the HR Staff tab edit view. Rows can be added, removed, and reordered before saving.
+- **Extra emails on directory cards** — additional emails appear below the primary email on every employee card, each with its label prefix and a copy-to-clipboard button.
+- **Extra emails on profile pages** — additional emails appear as individual `<dt>`/`<dd>` rows in the employee's `/staff/{slug}` profile detail list, using the label as the row heading.
+- `employee_dir_get_extra_emails( $user_id )` — returns validated `[['label'=>string,'email'=>string], ...]` for display; sanitization is applied on read as a safety net.
+- `employee_dir_admin_render_extra_emails_section( $extra_emails )` — shared renderer (defined in `includes/admin.php`) used by both the WP profile screen and the HR Staff tab to avoid duplication.
+
 ## [1.23.0] — 2026-03-04
 
 ### Added

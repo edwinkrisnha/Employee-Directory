@@ -76,6 +76,17 @@ if ( $referrer && str_starts_with( $referrer, home_url() ) ) {
 				</dd>
 			</div>
 
+			<?php foreach ( employee_dir_get_extra_emails( $user->ID ) as $extra ) : ?>
+				<div class="ed-profile-page__detail-row">
+					<dt><?php echo esc_html( '' !== $extra['label'] ? $extra['label'] : __( 'Email', 'internal-staff-directory' ) ); ?></dt>
+					<dd>
+						<a href="mailto:<?php echo esc_attr( $extra['email'] ); ?>">
+							<?php echo esc_html( $extra['email'] ); ?>
+						</a>
+					</dd>
+				</div>
+			<?php endforeach; ?>
+
 			<?php if ( ! empty( $profile['phone'] ) ) : ?>
 				<div class="ed-profile-page__detail-row">
 					<dt><?php esc_html_e( 'Phone', 'internal-staff-directory' ); ?></dt>

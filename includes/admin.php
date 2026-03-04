@@ -154,6 +154,7 @@ function employee_dir_show_extra_profile_fields( $user ) {
 	<?php
 	$hidden_social = employee_dir_get_hidden_social_fields( $user->ID );
 	employee_dir_admin_render_social_fields( $profile, $hidden_social );
+	employee_dir_admin_render_extra_emails_section( employee_dir_get_extra_emails( $user->ID ) );
 	?>
 	<?php
 	// Employment status section — only admins who can manage other users see this.
@@ -198,6 +199,18 @@ function employee_dir_save_extra_profile_fields( $user_id ) {
 		} elseif ( isset( $_POST[ 'ed_' . $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$data[ $field ] = wp_unslash( $_POST[ 'ed_' . $field ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
+	}
+
+	// Collect additional emails.
+	if ( isset( $_POST['ed_extra_emails'] ) && is_array( $_POST['ed_extra_emails'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$data['extra_emails'] = array_map( function ( $entry ) {
+			return [
+				'label' => isset( $entry['label'] ) ? wp_unslash( $entry['label'] ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				'email' => isset( $entry['email'] ) ? wp_unslash( $entry['email'] ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			];
+		}, $_POST['ed_extra_emails'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
+	} else {
+		$data['extra_emails'] = [];
 	}
 
 	// Collect hidden social fields: every social field NOT in ed_show_social[] is hidden.
@@ -294,6 +307,78 @@ function employee_dir_admin_render_social_fields( array $profile, array $hidden_
 		</tr>
 		<?php endforeach; ?>
 	</table>
+	<?php
+}
+
+// ---------------------------------------------------------------------------
+// Additional emails section
+// ---------------------------------------------------------------------------
+
+/**
+ * Render the Additional Emails section (dynamic add/remove rows).
+ * Used by the WP profile screen and the HR Staff tab edit view.
+ *
+ * @param array[] $extra_emails Saved entries: [['label' => string, 'email' => string], ...].
+ */
+function employee_dir_admin_render_extra_emails_section( array $extra_emails ) {
+	static $js_printed = false;
+	$count = count( $extra_emails );
+	?>
+	<h2><?php esc_html_e( 'Additional Emails', 'internal-staff-directory' ); ?></h2>
+	<p class="description" style="margin-bottom:1rem;">
+		<?php esc_html_e( 'Add work, personal, or other email addresses. The primary login email is always shown first.', 'internal-staff-directory' ); ?>
+	</p>
+	<div id="ed-extra-emails-wrapper">
+		<?php foreach ( $extra_emails as $i => $entry ) : ?>
+		<div class="ed-extra-email-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+			<input
+				type="text"
+				name="ed_extra_emails[<?php echo (int) $i; ?>][label]"
+				value="<?php echo esc_attr( $entry['label'] ); ?>"
+				placeholder="<?php esc_attr_e( 'Label (e.g. Work)', 'internal-staff-directory' ); ?>"
+				style="width:160px;"
+				class="regular-text"
+			/>
+			<input
+				type="email"
+				name="ed_extra_emails[<?php echo (int) $i; ?>][email]"
+				value="<?php echo esc_attr( $entry['email'] ); ?>"
+				placeholder="email@example.com"
+				class="regular-text"
+			/>
+			<button type="button" class="button-link ed-remove-email" style="color:#a00;">
+				<?php esc_html_e( 'Remove', 'internal-staff-directory' ); ?>
+			</button>
+		</div>
+		<?php endforeach; ?>
+	</div>
+	<p>
+		<button type="button" class="button" id="ed-add-email">
+			+ <?php esc_html_e( 'Add Another Email', 'internal-staff-directory' ); ?>
+		</button>
+	</p>
+	<?php if ( ! $js_printed ) :
+		$js_printed = true;
+		$label_placeholder = esc_js( __( 'Label (e.g. Work)', 'internal-staff-directory' ) );
+		$remove_text       = esc_js( __( 'Remove', 'internal-staff-directory' ) );
+	?>
+	<script>
+	jQuery(function($){
+		var edEC = <?php echo (int) $count; ?>;
+		$('#ed-add-email').on('click', function(){
+			var i   = edEC++;
+			var row = $('<div class="ed-extra-email-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"></div>');
+			row.append('<input type="text"  name="ed_extra_emails['+i+'][label]" value="" placeholder="<?php echo $label_placeholder; ?>" style="width:160px;" class="regular-text" />');
+			row.append('<input type="email" name="ed_extra_emails['+i+'][email]" value="" placeholder="email@example.com" class="regular-text" />');
+			row.append('<button type="button" class="button-link ed-remove-email" style="color:#a00;"><?php echo $remove_text; ?></button>');
+			$('#ed-extra-emails-wrapper').append(row);
+		});
+		$(document).on('click', '.ed-remove-email', function(){
+			$(this).closest('.ed-extra-email-row').remove();
+		});
+	});
+	</script>
+	<?php endif; ?>
 	<?php
 }
 

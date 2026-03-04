@@ -86,6 +86,25 @@ function employee_dir_save_profile( $user_id, array $data ) {
 		}
 	}
 
+	// Save additional emails.
+	if ( array_key_exists( 'extra_emails', $data ) ) {
+		$sanitized = [];
+		foreach ( (array) $data['extra_emails'] as $entry ) {
+			if ( ! is_array( $entry ) ) {
+				continue;
+			}
+			$email = sanitize_email( $entry['email'] ?? '' );
+			if ( '' === $email ) {
+				continue; // skip rows with no email
+			}
+			$sanitized[] = [
+				'label' => sanitize_text_field( $entry['label'] ?? '' ),
+				'email' => $email,
+			];
+		}
+		update_user_meta( $user_id, 'employee_dir_extra_emails', $sanitized );
+	}
+
 	// Save per-user social visibility preferences.
 	if ( array_key_exists( 'hidden_social_fields', $data ) ) {
 		$allowed_social = employee_dir_social_fields();
@@ -332,6 +351,38 @@ function employee_dir_get_birthday_employees( $days_before, $days_after, $extra_
 	} );
 
 	return $entries;
+}
+
+// ---------------------------------------------------------------------------
+// Extra emails helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Get the list of additional (non-primary) emails for a user.
+ *
+ * @param int $user_id
+ * @return array[] Each entry: ['label' => string, 'email' => string].
+ */
+function employee_dir_get_extra_emails( $user_id ) {
+	$raw = get_user_meta( $user_id, 'employee_dir_extra_emails', true );
+	if ( ! is_array( $raw ) ) {
+		return [];
+	}
+	$result = [];
+	foreach ( $raw as $entry ) {
+		if ( ! is_array( $entry ) ) {
+			continue;
+		}
+		$email = sanitize_email( $entry['email'] ?? '' );
+		if ( '' === $email ) {
+			continue;
+		}
+		$result[] = [
+			'label' => sanitize_text_field( $entry['label'] ?? '' ),
+			'email' => $email,
+		];
+	}
+	return $result;
 }
 
 // ---------------------------------------------------------------------------

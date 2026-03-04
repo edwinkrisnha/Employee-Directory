@@ -196,6 +196,18 @@ function employee_dir_hr_profile_data_from_post( array $post_data ) {
 		: [];
 	$data['hidden_social_fields'] = array_values( array_diff( $social_keys, $show_social ) );
 
+	// Additional emails.
+	if ( isset( $post_data['ed_extra_emails'] ) && is_array( $post_data['ed_extra_emails'] ) ) {
+		$data['extra_emails'] = array_map( function ( $entry ) {
+			return [
+				'label' => isset( $entry['label'] ) ? wp_unslash( $entry['label'] ) : '',
+				'email' => isset( $entry['email'] ) ? wp_unslash( $entry['email'] ) : '',
+			];
+		}, $post_data['ed_extra_emails'] );
+	} else {
+		$data['extra_emails'] = [];
+	}
+
 	// Resigned status.
 	$data['resigned']      = ! empty( $post_data['ed_resigned'] );
 	$data['resigned_date'] = isset( $post_data['ed_resigned_date'] ) ? wp_unslash( $post_data['ed_resigned_date'] ) : '';
@@ -744,6 +756,7 @@ function employee_dir_hr_render_edit_view( $user_id ) {
 		<?php
 		$hidden_social = employee_dir_get_hidden_social_fields( $user_id );
 		employee_dir_admin_render_social_fields( $profile, $hidden_social );
+		employee_dir_admin_render_extra_emails_section( employee_dir_get_extra_emails( $user_id ) );
 		employee_dir_admin_render_employment_status( $profile );
 		?>
 
