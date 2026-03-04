@@ -383,6 +383,62 @@ function employee_dir_birthdays_shortcode( $atts ) {
 }
 add_shortcode( 'employee_birthdays', 'employee_dir_birthdays_shortcode' );
 
+/**
+ * [employee_my_profile] shortcode.
+ * Renders a compact header widget showing the current logged-in user's
+ * profile photo, display name, and job title.
+ *
+ * Attributes:
+ *   photo_size (string) – Avatar size: small (40 px) | medium (64 px) | large (96 px) | none. Default: small.
+ *   show_name  (int)    – 1 to show the user's name, 0 to hide it. Default: 1.
+ *   show_title (int)    – 1 to show the job title, 0 to hide it. Default: 1.
+ *   link       (int)    – 1 to link photo and name to the profile page, 0 to skip links. Default: 1.
+ *   fallback   (string) – What to render when the user is not logged in: hide (empty) | login (login link). Default: hide.
+ *
+ * @param array $atts Shortcode attributes.
+ * @return string HTML output.
+ */
+function employee_dir_my_profile_shortcode( $atts ) {
+	$atts = shortcode_atts( [
+		'photo_size' => 'small',
+		'show_name'  => '1',
+		'show_title' => '1',
+		'link'       => '1',
+		'fallback'   => 'hide',
+	], $atts, 'employee_my_profile' );
+
+	// Whitelist photo_size to prevent arbitrary values reaching the template.
+	if ( ! in_array( $atts['photo_size'], [ 'small', 'medium', 'large', 'none' ], true ) ) {
+		$atts['photo_size'] = 'small';
+	}
+
+	if ( ! is_user_logged_in() ) {
+		if ( 'login' === $atts['fallback'] ) {
+			return '<a href="' . esc_url( wp_login_url( get_permalink() ) ) . '" class="ed-my-profile__login-link">'
+				. esc_html__( 'Log in', 'internal-staff-directory' )
+				. '</a>';
+		}
+		return '';
+	}
+
+	// Enqueue the plugin stylesheet so the widget is styled even when placed
+	// in headers or widget areas that render after wp_head().
+	wp_enqueue_style(
+		'internal-staff-directory',
+		EMPLOYEE_DIR_PLUGIN_URL . 'assets/directory.css',
+		[],
+		EMPLOYEE_DIR_VERSION
+	);
+
+	$user    = wp_get_current_user();
+	$profile = employee_dir_get_profile( $user->ID );
+
+	ob_start();
+	include EMPLOYEE_DIR_PLUGIN_DIR . 'templates/my-profile.php';
+	return ob_get_clean();
+}
+add_shortcode( 'employee_my_profile', 'employee_dir_my_profile_shortcode' );
+
 // ---------------------------------------------------------------------------
 // AJAX handler
 // ---------------------------------------------------------------------------
@@ -460,7 +516,8 @@ function employee_dir_enqueue_assets() {
 	$is_directory = is_a( $post, 'WP_Post' ) && (
 		has_shortcode( $post->post_content, 'employee_directory' ) ||
 		has_shortcode( $post->post_content, 'employee_new_hires' ) ||
-		has_shortcode( $post->post_content, 'employee_birthdays' )
+		has_shortcode( $post->post_content, 'employee_birthdays' ) ||
+		has_shortcode( $post->post_content, 'employee_my_profile' )
 	);
 	$is_profile   = (bool) get_query_var( 'ed_profile' );
 

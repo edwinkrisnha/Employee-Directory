@@ -973,3 +973,69 @@ span.ed-card__social-link {
 		flex: 0 0 140px;
 	}
 }
+
+/* ==========================================================================
+   My Profile widget — [employee_my_profile]
+   ========================================================================== */
+
+.ed-my-profile {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-family: inherit;
+	min-width: 0;
+}
+
+.ed-my-profile__photo-link {
+	display: block;
+	line-height: 0;
+	flex-shrink: 0;
+}
+
+.ed-my-profile__photo {
+	border-radius: 50%;
+	object-fit: cover;
+	display: block;
+	max-width: none;
+}
+
+.ed-my-profile__photo--small  { width: 40px; height: 40px; }
+.ed-my-profile__photo--medium { width: 64px; height: 64px; }
+.ed-my-profile__photo--large  { width: 96px; height: 96px; }
+
+.ed-my-profile__info {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.ed-my-profile__name {
+	font-weight: 600;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.ed-my-profile__name a {
+	text-decoration: none;
+	color: inherit;
+}
+
+.ed-my-profile__name a:hover {
+	text-decoration: underline;
+}
+
+.ed-my-profile__title {
+	font-size: 0.75rem;
+	color: #64748b;
+	line-height: 1.3;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.ed-my-profile__login-link {
+	font-size: 0.875rem;
+}

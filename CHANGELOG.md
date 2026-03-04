@@ -16,6 +16,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `employee_dir_format_birthday_label( $offset )` — returns "Today!", "In X days", or "X days ago" from an integer day offset.
 - `employee_dir_get_birthday_employees( $days_before, $days_after, $extra_args )` — fetches all users with a `birth_date` set, PHP-filters to the window (cross-year boundary safe), and returns sorted `[user, offset, profile]` entries.
 
+## [1.25.0] — 2026-03-04
+
+### Added
+- **`[employee_my_profile]` shortcode** — renders a compact inline profile chip for the currently logged-in user, designed for headers and nav bars. Displays a circular avatar, the user's display name, and their job title. Photo and text are independently toggleable via shortcode attributes.
+- Shortcode attributes: `photo_size` (small/medium/large/none, default: small), `show_name` (1/0, default: 1), `show_title` (1/0, default: 1), `link` (1/0, default: 1 — links photo and name to the profile page), `fallback` (hide/login, default: hide — shows a login link for guests when set to `login`).
+- Plugin stylesheet is automatically enqueued when `[employee_my_profile]` is present, including when placed in Elementor global headers or widget areas that render after `wp_head`.
+- `templates/my-profile.php` — dedicated template for the widget markup.
+- `.ed-my-profile` CSS component: inline-flex layout, circular avatar with `object-fit: cover`, ellipsis-truncated name and title, hover underline on name link.
+
 ## [1.24.0] — 2026-03-04
 
 ### Added

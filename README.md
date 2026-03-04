@@ -21,6 +21,7 @@ A lightweight WordPress plugin for internal staff directories. Provides a search
 - **Copy email** – Inline copy icon next to each email address; click to copy to clipboard, icon flashes green to confirm
 - **Social & Contact fields** – Eight social/contact fields per employee (WhatsApp, Telegram, Discord, Instagram, Facebook, Twitter/X, YouTube, TikTok). Each user can show or hide individual fields from their WP Profile page. Social fields appear as a compact icon row on cards and as labeled links on profile pages
 - **New hires spotlight** – `[employee_new_hires]` shortcode renders a card grid of employees who joined within the configurable **"New" badge window** (Settings → Internal Staff Directory). Sorted newest-first; no search or filter controls — use it as a homepage or sidebar widget. Card fields are controlled independently via **New hire card fields** in settings
+- **My Profile header widget** – `[employee_my_profile]` shortcode renders a compact, inline profile chip for the currently logged-in user: circular avatar, display name, and job title. Designed for headers, nav bars, and widget areas. Photo size, name, title, and profile-page link are each independently toggleable via shortcode attributes
 - **Birthday spotlight** – `[employee_birthdays]` shortcode renders a festive horizontal-scroll carousel of employees whose birthday falls within a configurable day window relative to today. Each portrait card shows a circular photo, name, job title, department, formatted birthday date, and a pill label ("🎂 Today!" / "🎈 In X days"). Cards cycle through five gradient color themes; "Today" cards glow gold with a pulsing photo ring. Cross-year boundaries handled correctly. Window defaults set in settings; overridable per shortcode
 - **Unified avatar** – The plugin photo (or a generated [DiceBear](https://www.dicebear.com/) avatar when none is set) is used everywhere WordPress renders an avatar — directory cards, profile pages, comments, author pages, and admin screens. Style is configurable in settings; avatar is seeded from the employee's display name
 - **Responsive card grid** – Clean card layout that adapts to all screen sizes
@@ -74,6 +75,32 @@ Display only employees who joined within the configured **"New" badge window**:
 | `role` | `"subscriber"` | Restrict to a single WordPress role slug |
 
 Results are sorted newest-first. The window is set via **Settings → Internal Staff Directory → "New" badge window**.
+
+### My Profile shortcode
+
+Display a compact profile chip for the currently logged-in user — ideal for headers and nav bars:
+
+```
+[employee_my_profile]
+```
+
+| Attribute | Default | Description |
+|---|---|---|
+| `photo_size` | `small` | Avatar size: `small` (40 px), `medium` (64 px), `large` (96 px), or `none` (no photo) |
+| `show_name` | `1` | Set to `0` to hide the display name |
+| `show_title` | `1` | Set to `0` to hide the job title |
+| `link` | `1` | Set to `0` to disable the link to the employee's profile page |
+| `fallback` | `hide` | What to render when the visitor is not logged in: `hide` (nothing) or `login` (a login link) |
+
+**Examples:**
+
+```
+[employee_my_profile photo_size="medium" show_title="0"]
+[employee_my_profile photo_size="none" link="0"]
+[employee_my_profile fallback="login"]
+```
+
+> **Elementor:** Add a **Shortcode** widget to your global header section and paste the `[employee_my_profile]` shortcode. The plugin stylesheet is automatically enqueued so the widget is styled on every page.
 
 ### Birthdays shortcode
 
