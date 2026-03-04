@@ -414,18 +414,20 @@ function employee_dir_hr_render_list_view() {
 		</a>
 
 		<?php /* ---- Filter bar ---- */ ?>
-		<form method="get" action="<?php echo esc_url( admin_url( 'options-general.php' ) ); ?>"
+		<form id="ed-hr-filter-form" method="get" action="<?php echo esc_url( admin_url( 'options-general.php' ) ); ?>"
 		      style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:1rem;padding:10px 12px;background:#f6f7f7;border:1px solid #dcdcde;border-radius:3px;">
 			<input type="hidden" name="page" value="employee-dir-settings">
 			<input type="hidden" name="tab"  value="staff">
 
 			<input type="search"
+			       id="ed-hr-search"
 			       name="ed_search"
 			       value="<?php echo esc_attr( $search ); ?>"
 			       placeholder="<?php esc_attr_e( 'Search name, email…', 'internal-staff-directory' ); ?>"
-			       style="min-width:180px;">
+			       style="min-width:180px;"
+			       autocomplete="off">
 
-			<select name="ed_status">
+			<select name="ed_status" onchange="this.form.submit()">
 				<option value=""><?php esc_html_e( 'All statuses', 'internal-staff-directory' ); ?></option>
 				<option value="active"   <?php selected( $status, 'active' ); ?>><?php esc_html_e( 'Active', 'internal-staff-directory' ); ?></option>
 				<option value="removed"  <?php selected( $status, 'removed' ); ?>><?php esc_html_e( 'Removed', 'internal-staff-directory' ); ?></option>
@@ -433,7 +435,7 @@ function employee_dir_hr_render_list_view() {
 			</select>
 
 			<?php if ( ! empty( $departments ) ) : ?>
-			<select name="ed_dept">
+			<select name="ed_dept" onchange="this.form.submit()">
 				<option value=""><?php esc_html_e( 'All departments', 'internal-staff-directory' ); ?></option>
 				<?php foreach ( $departments as $dept ) : ?>
 					<option value="<?php echo esc_attr( $dept ); ?>" <?php selected( $department, $dept ); ?>>
@@ -443,7 +445,7 @@ function employee_dir_hr_render_list_view() {
 			</select>
 			<?php endif; ?>
 
-			<select name="ed_role">
+			<select name="ed_role" onchange="this.form.submit()">
 				<option value=""><?php esc_html_e( 'All roles', 'internal-staff-directory' ); ?></option>
 				<?php foreach ( $all_roles as $slug => $role ) : ?>
 					<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $role_filter, $slug ); ?>>
@@ -452,7 +454,7 @@ function employee_dir_hr_render_list_view() {
 				<?php endforeach; ?>
 			</select>
 
-			<select name="ed_sort">
+			<select name="ed_sort" onchange="this.form.submit()">
 				<option value="name_asc"  <?php selected( $sort, 'name_asc' ); ?>><?php esc_html_e( 'Name A → Z', 'internal-staff-directory' ); ?></option>
 				<option value="name_desc" <?php selected( $sort, 'name_desc' ); ?>><?php esc_html_e( 'Name Z → A', 'internal-staff-directory' ); ?></option>
 				<option value="dept_asc"  <?php selected( $sort, 'dept_asc' ); ?>><?php esc_html_e( 'Department A → Z', 'internal-staff-directory' ); ?></option>
@@ -460,7 +462,7 @@ function employee_dir_hr_render_list_view() {
 			</select>
 
 			<label style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
-				<input type="checkbox" name="ed_hide_removed" value="1" <?php checked( $hide_removed ); ?>>
+				<input type="checkbox" name="ed_hide_removed" value="1" <?php checked( $hide_removed ); ?> onchange="this.form.submit()">
 				<?php esc_html_e( 'Hide removed', 'internal-staff-directory' ); ?>
 			</label>
 
@@ -472,6 +474,19 @@ function employee_dir_hr_render_list_view() {
 				</a>
 			<?php endif; ?>
 		</form>
+		<script>
+		( function () {
+			var input = document.getElementById( 'ed-hr-search' );
+			if ( ! input ) return;
+			var timer;
+			input.addEventListener( 'input', function () {
+				clearTimeout( timer );
+				timer = setTimeout( function () {
+					document.getElementById( 'ed-hr-filter-form' ).submit();
+				}, 400 );
+			} );
+		} )();
+		</script>
 
 		<?php if ( empty( $users ) ) : ?>
 			<p><?php esc_html_e( 'No users found.', 'internal-staff-directory' ); ?></p>

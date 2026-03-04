@@ -20,6 +20,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - **Filter & sort bar on HR Staff list** — a toolbar above the staff table lets HR filter by any combination of: free-text search (matches display name, email, username), status (Active / Removed / Resigned), department (populated from existing department values), and role. A sort dropdown controls ordering: Name A→Z (default), Name Z→A, Department A→Z, Newest registered. Active filters are preserved across pagination. A "Reset" link clears all filters.
+- **"Hide removed" checkbox** — a quick-toggle in the filter bar to exclude blocked (removed) users from the list without touching the status dropdown. Composes with all other filters; silently ignored when Status = Removed is selected.
+- **Filter on change** — all dropdowns and the "Hide removed" checkbox submit the filter form immediately on change. The search field submits after a 400 ms debounce. The Filter button is retained as a no-JS fallback.
 - Total count in pagination now reflects the filtered result set (previously used `count_users()` which ignores filters; now uses `WP_User_Query::get_total()`).
 
 ## [1.22.0] — 2026-03-03
