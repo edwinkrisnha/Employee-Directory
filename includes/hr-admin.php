@@ -697,6 +697,8 @@ function employee_dir_hr_render_edit_view( $user_id ) {
 			<?php // ---- Employee directory fields ---- ?>
 			<tr><td colspan="2"><hr><strong><?php esc_html_e( 'Directory Fields', 'internal-staff-directory' ); ?></strong></td></tr>
 
+			<?php employee_dir_admin_render_extra_emails_section( employee_dir_get_extra_emails( $user_id ) ); ?>
+
 			<tr>
 				<th scope="row"><label for="ed_department"><?php esc_html_e( 'Department', 'internal-staff-directory' ); ?></label></th>
 				<td><input type="text" id="ed_department" name="ed_department" value="<?php echo esc_attr( $profile['department'] ); ?>" class="regular-text"></td>
@@ -756,7 +758,6 @@ function employee_dir_hr_render_edit_view( $user_id ) {
 		<?php
 		$hidden_social = employee_dir_get_hidden_social_fields( $user_id );
 		employee_dir_admin_render_social_fields( $profile, $hidden_social );
-		employee_dir_admin_render_extra_emails_section( employee_dir_get_extra_emails( $user_id ) );
 		employee_dir_admin_render_employment_status( $profile );
 		?>
 

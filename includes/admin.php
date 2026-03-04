@@ -21,6 +21,7 @@ function employee_dir_show_extra_profile_fields( $user ) {
 	?>
 	<h2><?php esc_html_e( 'Employee Directory', 'internal-staff-directory' ); ?></h2>
 	<table class="form-table" role="presentation">
+		<?php employee_dir_admin_render_extra_emails_section( employee_dir_get_extra_emails( $user->ID ) ); ?>
 		<?php foreach ( $fields as $key => $label ) : ?>
 		<?php if ( in_array( $key, $social_keys, true ) ) continue; // rendered in the Social section below ?>
 		<tr>
@@ -154,7 +155,6 @@ function employee_dir_show_extra_profile_fields( $user ) {
 	<?php
 	$hidden_social = employee_dir_get_hidden_social_fields( $user->ID );
 	employee_dir_admin_render_social_fields( $profile, $hidden_social );
-	employee_dir_admin_render_extra_emails_section( employee_dir_get_extra_emails( $user->ID ) );
 	?>
 	<?php
 	// Employment status section — only admins who can manage other users see this.
@@ -324,61 +324,65 @@ function employee_dir_admin_render_extra_emails_section( array $extra_emails ) {
 	static $js_printed = false;
 	$count = count( $extra_emails );
 	?>
-	<h2><?php esc_html_e( 'Additional Emails', 'internal-staff-directory' ); ?></h2>
-	<p class="description" style="margin-bottom:1rem;">
-		<?php esc_html_e( 'Add work, personal, or other email addresses. The primary login email is always shown first.', 'internal-staff-directory' ); ?>
-	</p>
-	<div id="ed-extra-emails-wrapper">
-		<?php foreach ( $extra_emails as $i => $entry ) : ?>
-		<div class="ed-extra-email-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-			<input
-				type="text"
-				name="ed_extra_emails[<?php echo (int) $i; ?>][label]"
-				value="<?php echo esc_attr( $entry['label'] ); ?>"
-				placeholder="<?php esc_attr_e( 'Label (e.g. Work)', 'internal-staff-directory' ); ?>"
-				style="width:160px;"
-				class="regular-text"
-			/>
-			<input
-				type="email"
-				name="ed_extra_emails[<?php echo (int) $i; ?>][email]"
-				value="<?php echo esc_attr( $entry['email'] ); ?>"
-				placeholder="email@example.com"
-				class="regular-text"
-			/>
-			<button type="button" class="button-link ed-remove-email" style="color:#a00;">
-				<?php esc_html_e( 'Remove', 'internal-staff-directory' ); ?>
-			</button>
-		</div>
-		<?php endforeach; ?>
-	</div>
-	<p>
-		<button type="button" class="button" id="ed-add-email">
-			+ <?php esc_html_e( 'Add Another Email', 'internal-staff-directory' ); ?>
-		</button>
-	</p>
-	<?php if ( ! $js_printed ) :
-		$js_printed = true;
-		$label_placeholder = esc_js( __( 'Label (e.g. Work)', 'internal-staff-directory' ) );
-		$remove_text       = esc_js( __( 'Remove', 'internal-staff-directory' ) );
-	?>
-	<script>
-	jQuery(function($){
-		var edEC = <?php echo (int) $count; ?>;
-		$('#ed-add-email').on('click', function(){
-			var i   = edEC++;
-			var row = $('<div class="ed-extra-email-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"></div>');
-			row.append('<input type="text"  name="ed_extra_emails['+i+'][label]" value="" placeholder="<?php echo $label_placeholder; ?>" style="width:160px;" class="regular-text" />');
-			row.append('<input type="email" name="ed_extra_emails['+i+'][email]" value="" placeholder="email@example.com" class="regular-text" />');
-			row.append('<button type="button" class="button-link ed-remove-email" style="color:#a00;"><?php echo $remove_text; ?></button>');
-			$('#ed-extra-emails-wrapper').append(row);
-		});
-		$(document).on('click', '.ed-remove-email', function(){
-			$(this).closest('.ed-extra-email-row').remove();
-		});
-	});
-	</script>
-	<?php endif; ?>
+	<tr>
+		<th scope="row"><?php esc_html_e( 'Additional Emails', 'internal-staff-directory' ); ?></th>
+		<td>
+			<p class="description" style="margin-bottom:8px;">
+				<?php esc_html_e( 'Add work, personal, or other email addresses. The primary login email is always shown first.', 'internal-staff-directory' ); ?>
+			</p>
+			<div id="ed-extra-emails-wrapper">
+				<?php foreach ( $extra_emails as $i => $entry ) : ?>
+				<div class="ed-extra-email-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+					<input
+						type="text"
+						name="ed_extra_emails[<?php echo (int) $i; ?>][label]"
+						value="<?php echo esc_attr( $entry['label'] ); ?>"
+						placeholder="<?php esc_attr_e( 'Label (e.g. Work)', 'internal-staff-directory' ); ?>"
+						style="width:160px;"
+						class="regular-text"
+					/>
+					<input
+						type="email"
+						name="ed_extra_emails[<?php echo (int) $i; ?>][email]"
+						value="<?php echo esc_attr( $entry['email'] ); ?>"
+						placeholder="email@example.com"
+						class="regular-text"
+					/>
+					<button type="button" class="button-link ed-remove-email" style="color:#a00;">
+						<?php esc_html_e( 'Remove', 'internal-staff-directory' ); ?>
+					</button>
+				</div>
+				<?php endforeach; ?>
+			</div>
+			<p style="margin-top:4px;">
+				<button type="button" class="button" id="ed-add-email">
+					+ <?php esc_html_e( 'Add Another Email', 'internal-staff-directory' ); ?>
+				</button>
+			</p>
+			<?php if ( ! $js_printed ) :
+				$js_printed = true;
+				$label_placeholder = esc_js( __( 'Label (e.g. Work)', 'internal-staff-directory' ) );
+				$remove_text       = esc_js( __( 'Remove', 'internal-staff-directory' ) );
+			?>
+			<script>
+			jQuery(function($){
+				var edEC = <?php echo (int) $count; ?>;
+				$('#ed-add-email').on('click', function(){
+					var i   = edEC++;
+					var row = $('<div class="ed-extra-email-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"></div>');
+					row.append('<input type="text"  name="ed_extra_emails['+i+'][label]" value="" placeholder="<?php echo $label_placeholder; ?>" style="width:160px;" class="regular-text" />');
+					row.append('<input type="email" name="ed_extra_emails['+i+'][email]" value="" placeholder="email@example.com" class="regular-text" />');
+					row.append('<button type="button" class="button-link ed-remove-email" style="color:#a00;"><?php echo $remove_text; ?></button>');
+					$('#ed-extra-emails-wrapper').append(row);
+				});
+				$(document).on('click', '.ed-remove-email', function(){
+					$(this).closest('.ed-extra-email-row').remove();
+				});
+			});
+			</script>
+			<?php endif; ?>
+		</td>
+	</tr>
 	<?php
 }
 
