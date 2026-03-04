@@ -267,7 +267,8 @@ function employee_dir_hr_render_list_view() {
 	$status     = isset( $_GET['ed_status'] ) ? sanitize_key( $_GET['ed_status'] )                            : '';
 	$department = isset( $_GET['ed_dept'] )   ? sanitize_text_field( wp_unslash( $_GET['ed_dept'] ) )         : '';
 	$role_filter= isset( $_GET['ed_role'] )   ? sanitize_key( $_GET['ed_role'] )                              : '';
-	$sort       = isset( $_GET['ed_sort'] )   ? sanitize_key( $_GET['ed_sort'] )                              : 'name_asc';
+	$sort        = isset( $_GET['ed_sort'] )        ? sanitize_key( $_GET['ed_sort'] )                        : 'name_asc';
+	$hide_removed = ! empty( $_GET['ed_hide_removed'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	// phpcs:enable
 
 	// Validate status against known values; ignore unknown input.
@@ -373,6 +374,12 @@ function employee_dir_hr_render_list_view() {
 			break;
 	}
 
+	// Hide removed: exclude blocked users unless the status filter is explicitly showing them.
+	if ( $hide_removed && 'removed' !== $status && ! empty( $blocked_ids ) ) {
+		$existing_exclude          = isset( $query_args['exclude'] ) ? (array) $query_args['exclude'] : [];
+		$query_args['exclude']     = array_values( array_unique( array_merge( $existing_exclude, $blocked_ids ) ) );
+	}
+
 	// Run query (or short-circuit for impossible filter combination).
 	if ( $force_empty ) {
 		$users       = [];
@@ -388,16 +395,17 @@ function employee_dir_hr_render_list_view() {
 
 	// Params to carry through pagination + filter form.
 	$filter_params = array_filter( [
-		'ed_search' => $search,
-		'ed_status' => $status,
-		'ed_dept'   => $department,
-		'ed_role'   => $role_filter,
-		'ed_sort'   => ( 'name_asc' !== $sort ) ? $sort : '',
+		'ed_search'       => $search,
+		'ed_status'       => $status,
+		'ed_dept'         => $department,
+		'ed_role'         => $role_filter,
+		'ed_sort'         => ( 'name_asc' !== $sort ) ? $sort : '',
+		'ed_hide_removed' => $hide_removed ? '1' : '',
 	] );
 
 	$departments = employee_dir_get_departments();
 	$all_roles   = wp_roles()->roles;
-	$has_filters = ( '' !== $search || '' !== $status || '' !== $department || '' !== $role_filter );
+	$has_filters = ( '' !== $search || '' !== $status || '' !== $department || '' !== $role_filter || $hide_removed );
 	?>
 	<div style="margin-top:1.5rem;">
 		<a href="<?php echo esc_url( employee_dir_hr_tab_url( [ 'view' => 'create' ] ) ); ?>"
@@ -450,6 +458,11 @@ function employee_dir_hr_render_list_view() {
 				<option value="dept_asc"  <?php selected( $sort, 'dept_asc' ); ?>><?php esc_html_e( 'Department A → Z', 'internal-staff-directory' ); ?></option>
 				<option value="newest"    <?php selected( $sort, 'newest' ); ?>><?php esc_html_e( 'Newest registered', 'internal-staff-directory' ); ?></option>
 			</select>
+
+			<label style="display:flex;align-items:center;gap:4px;white-space:nowrap;">
+				<input type="checkbox" name="ed_hide_removed" value="1" <?php checked( $hide_removed ); ?>>
+				<?php esc_html_e( 'Hide removed', 'internal-staff-directory' ); ?>
+			</label>
 
 			<?php submit_button( __( 'Filter', 'internal-staff-directory' ), 'secondary', '', false, [ 'style' => 'margin:0;' ] ); ?>
 
