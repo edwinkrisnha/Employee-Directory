@@ -12,11 +12,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 <div class="ed-birthdays" id="ed-birthdays">
 
-	<div class="ed-birthdays__header" aria-hidden="true">
+	<!-- <div class="ed-birthdays__header" aria-hidden="true">
 		<span class="ed-birthdays__ornament"></span>
 		<span class="ed-birthdays__icon">🎂</span>
 		<span class="ed-birthdays__ornament"></span>
-	</div>
+	</div> -->
 
 	<?php if ( $birthday_entries ) : ?>
 		<div class="ed-bday-carousel" data-columns="<?php echo esc_attr( $birthday_columns ); ?>">
