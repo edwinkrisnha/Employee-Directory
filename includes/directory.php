@@ -336,6 +336,7 @@ function employee_dir_new_hires_shortcode( $atts ) {
 	$visible_fields       = $settings['new_hire_visible_fields'];
 	$new_hire_columns     = max( 1, min( 3, (int) $settings['new_hire_columns'] ) );
 	$card_photo_size      = $settings['new_hire_photo_size'];
+	$card_dept_colors     = (int) $settings['new_hire_dept_colors'];
 
 	ob_start();
 	include EMPLOYEE_DIR_PLUGIN_DIR . 'templates/new-hires.php';

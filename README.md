@@ -135,6 +135,7 @@ Go to **Settings → Internal Staff Directory** to configure:
 | Send message platform | None | Show a quick-action button on cards: None, Email (mailto:), or Microsoft Teams |
 | Avatar fallback style | Big Smile | DiceBear style used when an employee has no profile photo — [31 styles available](https://www.dicebear.com/styles/) |
 | "New" badge window | 90 days | Employees who joined within this many days get a "New" badge. Set to 0 to disable |
+| New hire department stripe | On | Color-code `[employee_new_hires]` cards' left border by department. Independent from the main directory department stripe setting |
 | New hire card fields | Department, Job Title, Start Date | Fields shown on `[employee_new_hires]` cards (independent from Visible card fields) |
 | Birthday window — days before | 7 | Include birthdays up to this many days in the past in `[employee_birthdays]` (0–30) |
 | Birthday window — days after | 7 | Include birthdays up to this many days ahead in `[employee_birthdays]` (0–30) |

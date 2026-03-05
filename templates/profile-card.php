@@ -15,7 +15,8 @@ $settings         = employee_dir_get_settings();
 $photo_size_map   = [ 'small' => 40, 'medium' => 64, 'large' => 96 ];
 $_resolved_size   = isset( $card_photo_size ) && isset( $photo_size_map[ $card_photo_size ] ) ? $card_photo_size : $settings['photo_size'];
 $photo_px         = $photo_size_map[ $_resolved_size ] ?? 64;
-$dept_color       = $settings['dept_colors'] ? employee_dir_dept_color( $profile['department'] ?? '' ) : '';
+$_use_dept_colors = isset( $card_dept_colors ) ? $card_dept_colors : $settings['dept_colors'];
+$dept_color       = $_use_dept_colors ? employee_dir_dept_color( $profile['department'] ?? '' ) : '';
 $message_platform = $settings['message_platform'];
 $profile_url      = employee_dir_get_profile_url( $user );
 

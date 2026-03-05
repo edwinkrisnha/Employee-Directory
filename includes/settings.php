@@ -39,6 +39,7 @@ function employee_dir_get_settings() {
 		'dicebear_style'   => 'big-smile',
 		'new_hire_days'            => 90,
 		'new_hire_photo_size'      => 'medium',
+		'new_hire_dept_colors'     => 1,
 		'new_hire_columns'         => 3,
 		'new_hire_visible_fields'  => [ 'department', 'job_title', 'start_date' ],
 		'blocked_users'           => [],
@@ -190,6 +191,14 @@ function employee_dir_register_settings() {
 	);
 
 	add_settings_field(
+		'employee_dir_new_hire_dept_colors',
+		__( 'New hire department stripe', 'internal-staff-directory' ),
+		'employee_dir_field_new_hire_dept_colors',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
+
+	add_settings_field(
 		'employee_dir_new_hire_columns',
 		__( 'New hire columns', 'internal-staff-directory' ),
 		'employee_dir_field_new_hire_columns',
@@ -320,6 +329,9 @@ function employee_dir_sanitize_settings( $input ) {
 	$output['new_hire_photo_size'] = ( isset( $input['new_hire_photo_size'] ) && in_array( $input['new_hire_photo_size'], $valid_sizes, true ) )
 		? $input['new_hire_photo_size']
 		: 'medium';
+
+	// new_hire_dept_colors: boolean stored as int
+	$output['new_hire_dept_colors'] = ! empty( $input['new_hire_dept_colors'] ) ? 1 : 0;
 
 	// new_hire_visible_fields: same whitelist as visible_fields
 	$output['new_hire_visible_fields'] = [];
@@ -707,6 +719,27 @@ function employee_dir_field_new_hire_photo_size() {
 	?>
 	<p class="description">
 		<?php esc_html_e( 'Profile photo diameter on [employee_new_hires] cards. Independent from the main directory photo size.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "New hire department stripe" checkbox.
+ */
+function employee_dir_field_new_hire_dept_colors() {
+	$settings = employee_dir_get_settings();
+	?>
+	<label>
+		<input
+			type="checkbox"
+			name="employee_dir_settings[new_hire_dept_colors]"
+			value="1"
+			<?php checked( 1, $settings['new_hire_dept_colors'] ); ?>
+		/>
+		<?php esc_html_e( 'Color-code [employee_new_hires] cards by department', 'internal-staff-directory' ); ?>
+	</label>
+	<p class="description">
+		<?php esc_html_e( 'When unchecked, the colored left border is removed from [employee_new_hires] cards. Independent from the main directory department stripe setting.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }

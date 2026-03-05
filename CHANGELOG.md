@@ -4,6 +4,11 @@ All notable changes to Employee Directory will be documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.31.0] — 2026-03-05
+
+### Added
+- **New hire department stripe setting** — a new **New hire department stripe** checkbox under Settings → Internal Staff Directory controls whether `[employee_new_hires]` cards show a colored left border by department. Independent from the main directory **Department color stripe** setting. Stored as `new_hire_dept_colors` (boolean int) in `employee_dir_settings`. The `profile-card.php` partial now also accepts an optional `$card_dept_colors` variable from the caller, falling back to `$settings['dept_colors']` when not set.
+
 ## [1.30.0] — 2026-03-05
 
 ### Added
