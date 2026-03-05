@@ -445,17 +445,12 @@
 	border-left: none;
 	border-right: none;
 	border-top: none;
-	padding: 0.75rem 0;
+	padding: 0.75rem 1rem;
 	align-items: center;
 }
 
 .ed-results--list .ed-card:first-child {
 	border-top: 1px solid #e2e8f0;
-}
-
-.ed-results--list .ed-card__photo {
-	width: 40px;
-	height: 40px;
 }
 
 .ed-results--list .ed-card__bio {
