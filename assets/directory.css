@@ -3,7 +3,6 @@
    ========================================================================== */
 
 .internal-staff-directory {
-	max-width: 1100px;
 	margin: 0 auto;
 	font-family: inherit;
 }
@@ -169,6 +168,26 @@
 .ed-results.is-loading {
 	opacity: 0.4;
 	pointer-events: none;
+}
+
+/* Column overrides — controlled via Settings → Grid columns */
+.ed-results[data-columns="1"] {
+	grid-template-columns: 1fr;
+}
+
+.ed-results[data-columns="2"] {
+	grid-template-columns: repeat(2, 1fr);
+}
+
+.ed-results[data-columns="3"] {
+	grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+	.ed-results[data-columns="2"],
+	.ed-results[data-columns="3"] {
+		grid-template-columns: 1fr;
+	}
 }
 
 /* --------------------------------------------------------------------------

@@ -42,6 +42,7 @@ function employee_dir_get_settings() {
 		'blocked_users'           => [],
 		'birthday_days_before'    => 7,
 		'birthday_days_after'     => 7,
+		'grid_columns'            => 3,
 	] );
 
 	$saved = get_option( 'employee_dir_settings', [] );
@@ -172,6 +173,14 @@ function employee_dir_register_settings() {
 		'employee_dir_blocked_users',
 		__( 'Blocked users', 'internal-staff-directory' ),
 		'employee_dir_field_blocked_users',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
+
+	add_settings_field(
+		'employee_dir_grid_columns',
+		__( 'Grid columns', 'internal-staff-directory' ),
+		'employee_dir_field_grid_columns',
 		'employee-dir-settings',
 		'employee_dir_main'
 	);
@@ -308,6 +317,12 @@ function employee_dir_sanitize_settings( $input ) {
 			$output['blocked_users'] = array_values( array_unique( $ids ) );
 		}
 	}
+
+	// grid_columns: 1, 2, or 3
+	$valid_columns = [ 1, 2, 3 ];
+	$output['grid_columns'] = ( isset( $input['grid_columns'] ) && in_array( (int) $input['grid_columns'], $valid_columns, true ) )
+		? (int) $input['grid_columns']
+		: 3;
 
 	// birthday_days_before / birthday_days_after: integer 0–30
 	if ( isset( $input['birthday_days_before'] ) ) {
@@ -677,6 +692,35 @@ function employee_dir_field_blocked_users() {
 	><?php echo esc_textarea( $value ); ?></textarea>
 	<p class="description">
 		<?php esc_html_e( 'Users listed here (by username or email, one per line) will never appear in the directory.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "Grid columns" radio group (1, 2, or 3 columns).
+ */
+function employee_dir_field_grid_columns() {
+	$settings = employee_dir_get_settings();
+	$current  = (int) $settings['grid_columns'];
+	$options  = [
+		1 => __( '1 column', 'internal-staff-directory' ),
+		2 => __( '2 columns', 'internal-staff-directory' ),
+		3 => __( '3 columns (default)', 'internal-staff-directory' ),
+	];
+	foreach ( $options as $value => $label ) : ?>
+		<label style="display:inline-block; margin-right: 1rem;">
+			<input
+				type="radio"
+				name="employee_dir_settings[grid_columns]"
+				value="<?php echo esc_attr( $value ); ?>"
+				<?php checked( $current, $value ); ?>
+			/>
+			<?php echo esc_html( $label ); ?>
+		</label>
+	<?php endforeach;
+	?>
+	<p class="description">
+		<?php esc_html_e( 'Number of columns shown in grid view. List and vertical views are not affected.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }

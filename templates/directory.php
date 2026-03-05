@@ -75,7 +75,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		</div>
 	</form>
 
-	<div class="ed-results" id="ed-results" aria-live="polite" aria-atomic="true">
+	<div class="ed-results" id="ed-results" aria-live="polite" aria-atomic="true" data-columns="<?php echo esc_attr( $grid_columns ); ?>">
 		<?php if ( $employees ) : ?>
 			<?php
 			$visible_fields = employee_dir_get_settings()['visible_fields'];

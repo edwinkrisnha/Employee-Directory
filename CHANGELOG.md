@@ -4,6 +4,11 @@ All notable changes to Employee Directory will be documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.26.0] — 2026-03-05
+
+### Added
+- **Grid columns setting** — a new **Grid columns** radio group under Settings → Internal Staff Directory lets admins set the number of columns in grid view to 1, 2, or 3 (default: 3). Stored as `grid_columns` in `employee_dir_settings`. Rendered via a `data-columns` attribute on the results container; overridden by CSS attribute selectors so column count is applied without JavaScript. Collapses to a single column below 768 px regardless of the setting. List and vertical views are unaffected.
+
 ## [1.20.0] — 2026-03-02
 
 ### Added

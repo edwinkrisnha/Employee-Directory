@@ -138,6 +138,7 @@ Go to **Settings → Internal Staff Directory** to configure:
 | New hire card fields | Department, Job Title, Start Date | Fields shown on `[employee_new_hires]` cards (independent from Visible card fields) |
 | Birthday window — days before | 7 | Include birthdays up to this many days in the past in `[employee_birthdays]` (0–30) |
 | Birthday window — days after | 7 | Include birthdays up to this many days ahead in `[employee_birthdays]` (0–30) |
+| Grid columns | 3 | Number of columns shown in grid view: 1, 2, or 3. List and vertical views are not affected |
 
 ### Profile Fields
 

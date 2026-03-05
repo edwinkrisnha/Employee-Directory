@@ -264,8 +264,9 @@ function employee_dir_shortcode( $atts ) {
 	$total_pages = ( $per_page > 0 )
 		? (int) ceil( $query->get_total() / $per_page )
 		: 1;
-	$departments = employee_dir_get_departments();
-	$pagination  = employee_dir_pagination_html( $total_pages, $paged );
+	$departments  = employee_dir_get_departments();
+	$pagination   = employee_dir_pagination_html( $total_pages, $paged );
+	$grid_columns = max( 1, min( 3, (int) $settings['grid_columns'] ) );
 
 	// Pass pagination state to JS so the first AJAX request knows the right page.
 	wp_localize_script( 'internal-staff-directory', 'employeeDirPage', [
