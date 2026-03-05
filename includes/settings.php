@@ -93,6 +93,22 @@ function employee_dir_register_settings() {
 	);
 
 	add_settings_field(
+		'employee_dir_grid_columns',
+		__( 'Grid columns', 'internal-staff-directory' ),
+		'employee_dir_field_grid_columns',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
+
+	add_settings_field(
+		'employee_dir_enabled_views',
+		__( 'Available views', 'internal-staff-directory' ),
+		'employee_dir_field_enabled_views',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
+
+	add_settings_field(
 		'employee_dir_per_page',
 		__( 'Results per page', 'internal-staff-directory' ),
 		'employee_dir_field_per_page',
@@ -184,22 +200,6 @@ function employee_dir_register_settings() {
 		'employee_dir_blocked_users',
 		__( 'Blocked users', 'internal-staff-directory' ),
 		'employee_dir_field_blocked_users',
-		'employee-dir-settings',
-		'employee_dir_main'
-	);
-
-	add_settings_field(
-		'employee_dir_grid_columns',
-		__( 'Grid columns', 'internal-staff-directory' ),
-		'employee_dir_field_grid_columns',
-		'employee-dir-settings',
-		'employee_dir_main'
-	);
-
-	add_settings_field(
-		'employee_dir_enabled_views',
-		__( 'Available views', 'internal-staff-directory' ),
-		'employee_dir_field_enabled_views',
 		'employee-dir-settings',
 		'employee_dir_main'
 	);
