@@ -11,6 +11,8 @@
  *   @var int       $total_pages
  *   @var string    $pagination         Pre-rendered pagination nav HTML.
  *   @var string    $locked_department  Non-empty when the shortcode locked a dept.
+ *   @var string[]  $enabled_views      Which view modes are available: grid, list, vertical.
+ *   @var int       $grid_columns       Number of columns for grid view (1–3).
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -67,11 +69,23 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 					<?php esc_html_e( 'All', 'internal-staff-directory' ); ?>
 				</a>
 			</nav>
-			<div class="ed-view-switch" role="group" aria-label="View switch">
-				<button type="button" class="ed-view-btn" data-view="grid">Grid</button>
-				<button type="button" class="ed-view-btn" data-view="list">List</button>
-				<button type="button" class="ed-view-btn" data-view="vertical">Vertical</button>
+			<?php if ( count( $enabled_views ) > 1 ) : ?>
+			<div class="ed-view-switch" role="group" aria-label="<?php esc_attr_e( 'View switch', 'internal-staff-directory' ); ?>">
+				<?php
+				$view_labels = [
+					'grid'     => __( 'Grid', 'internal-staff-directory' ),
+					'list'     => __( 'List', 'internal-staff-directory' ),
+					'vertical' => __( 'Vertical', 'internal-staff-directory' ),
+				];
+				foreach ( $view_labels as $view_key => $view_label ) :
+					if ( ! in_array( $view_key, $enabled_views, true ) ) continue;
+				?>
+					<button type="button" class="ed-view-btn" data-view="<?php echo esc_attr( $view_key ); ?>">
+						<?php echo esc_html( $view_label ); ?>
+					</button>
+				<?php endforeach; ?>
 			</div>
+			<?php endif; ?>
 		</div>
 	</form>
 

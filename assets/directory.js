@@ -37,6 +37,11 @@
 	// View state: 'grid' | 'list' | 'vertical'
 	var currentView = 'grid';
 
+	// Enabled views from settings (falls back to all three if not provided).
+	var enabledViews = ( window.employeeDirViews && Array.isArray( employeeDirViews.enabled ) && employeeDirViews.enabled.length )
+		? employeeDirViews.enabled
+		: [ 'grid', 'list', 'vertical' ];
+
 	// -------------------------------------------------------------------------
 	// View helpers
 	// -------------------------------------------------------------------------
@@ -55,11 +60,12 @@
 		});
 	}
 
-	// Restore saved preference on load.
+	// Restore saved preference on load; fall back to first enabled view if saved is no longer available.
 	try {
-		applyView( localStorage.getItem( LS_VIEW_KEY ) || 'grid' );
+		var savedView = localStorage.getItem( LS_VIEW_KEY ) || enabledViews[0];
+		applyView( enabledViews.indexOf( savedView ) !== -1 ? savedView : enabledViews[0] );
 	} catch ( e ) {
-		applyView( 'grid' );
+		applyView( enabledViews[0] );
 	}
 
 	$(document).on('click', '.ed-view-btn', function () {

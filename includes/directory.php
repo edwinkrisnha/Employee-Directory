@@ -264,14 +264,20 @@ function employee_dir_shortcode( $atts ) {
 	$total_pages = ( $per_page > 0 )
 		? (int) ceil( $query->get_total() / $per_page )
 		: 1;
-	$departments  = employee_dir_get_departments();
-	$pagination   = employee_dir_pagination_html( $total_pages, $paged );
-	$grid_columns = max( 1, min( 3, (int) $settings['grid_columns'] ) );
+	$departments   = employee_dir_get_departments();
+	$pagination    = employee_dir_pagination_html( $total_pages, $paged );
+	$grid_columns  = max( 1, min( 3, (int) $settings['grid_columns'] ) );
+	$enabled_views = ! empty( $settings['enabled_views'] ) ? (array) $settings['enabled_views'] : [ 'grid' ];
 
 	// Pass pagination state to JS so the first AJAX request knows the right page.
 	wp_localize_script( 'internal-staff-directory', 'employeeDirPage', [
 		'currentPage' => $paged,
 		'totalPages'  => $total_pages,
+	] );
+
+	// Pass enabled views so JS can restrict localStorage restore and view switching.
+	wp_localize_script( 'internal-staff-directory', 'employeeDirViews', [
+		'enabled' => array_values( $enabled_views ),
 	] );
 
 	// Pass locked shortcode constraints so JS always sends them with every AJAX request.

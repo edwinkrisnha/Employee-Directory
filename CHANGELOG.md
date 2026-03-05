@@ -4,6 +4,11 @@ All notable changes to Employee Directory will be documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.27.0] — 2026-03-05
+
+### Added
+- **Available views setting** — a new **Available views** checkbox group under Settings → Internal Staff Directory lets admins enable or disable individual view modes (Grid, List, Vertical). The view switcher is hidden entirely when only one view is enabled. Grid is always the minimum fallback so the directory is never left without a view. Stored as `enabled_views` (string array) in `employee_dir_settings`. Buttons are rendered server-side; JS falls back to the first enabled view when a previously saved localStorage preference is no longer available.
+
 ## [1.26.1] — 2026-03-05
 
 ### Changed

@@ -43,6 +43,7 @@ function employee_dir_get_settings() {
 		'birthday_days_before'    => 7,
 		'birthday_days_after'     => 7,
 		'grid_columns'            => 3,
+		'enabled_views'           => [ 'grid', 'list', 'vertical' ],
 	] );
 
 	$saved = get_option( 'employee_dir_settings', [] );
@@ -186,6 +187,14 @@ function employee_dir_register_settings() {
 	);
 
 	add_settings_field(
+		'employee_dir_enabled_views',
+		__( 'Available views', 'internal-staff-directory' ),
+		'employee_dir_field_enabled_views',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
+
+	add_settings_field(
 		'employee_dir_birthday_days_before',
 		__( 'Birthday window — days before', 'internal-staff-directory' ),
 		'employee_dir_field_birthday_days_before',
@@ -323,6 +332,20 @@ function employee_dir_sanitize_settings( $input ) {
 	$output['grid_columns'] = ( isset( $input['grid_columns'] ) && in_array( (int) $input['grid_columns'], $valid_columns, true ) )
 		? (int) $input['grid_columns']
 		: 3;
+
+	// enabled_views: subset of ['grid','list','vertical']; at least one must remain.
+	$valid_views            = [ 'grid', 'list', 'vertical' ];
+	$output['enabled_views'] = [];
+	if ( ! empty( $input['enabled_views'] ) && is_array( $input['enabled_views'] ) ) {
+		foreach ( $input['enabled_views'] as $view ) {
+			if ( in_array( $view, $valid_views, true ) ) {
+				$output['enabled_views'][] = $view;
+			}
+		}
+	}
+	if ( empty( $output['enabled_views'] ) ) {
+		$output['enabled_views'] = [ 'grid' ]; // grid is the minimum fallback
+	}
 
 	// birthday_days_before / birthday_days_after: integer 0–30
 	if ( isset( $input['birthday_days_before'] ) ) {
@@ -721,6 +744,40 @@ function employee_dir_field_grid_columns() {
 	?>
 	<p class="description">
 		<?php esc_html_e( 'Number of columns shown in grid view. List and vertical views are not affected.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "Available views" checkbox group.
+ */
+function employee_dir_field_enabled_views() {
+	$settings = employee_dir_get_settings();
+	$enabled  = (array) $settings['enabled_views'];
+	$views    = [
+		'grid'     => __( 'Grid', 'internal-staff-directory' ),
+		'list'     => __( 'List', 'internal-staff-directory' ),
+		'vertical' => __( 'Vertical', 'internal-staff-directory' ),
+	];
+	?>
+	<fieldset>
+		<legend class="screen-reader-text">
+			<?php esc_html_e( 'Available views', 'internal-staff-directory' ); ?>
+		</legend>
+		<?php foreach ( $views as $key => $label ) : ?>
+			<label style="display:inline-block; margin-right: 1rem;">
+				<input
+					type="checkbox"
+					name="employee_dir_settings[enabled_views][]"
+					value="<?php echo esc_attr( $key ); ?>"
+					<?php checked( in_array( $key, $enabled, true ) ); ?>
+				/>
+				<?php echo esc_html( $label ); ?>
+			</label>
+		<?php endforeach; ?>
+	</fieldset>
+	<p class="description">
+		<?php esc_html_e( 'Which view modes visitors can choose from. The view switcher is hidden when only one is enabled. Grid is always available as a fallback.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }
