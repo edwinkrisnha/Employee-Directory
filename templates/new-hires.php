@@ -3,15 +3,16 @@
  * New hires spotlight template.
  *
  * Variables provided by employee_dir_new_hires_shortcode():
- *   @var WP_User[] $employees      Users within the new_hire_days window.
- *   @var string[]  $visible_fields Fields enabled in plugin settings.
+ *   @var WP_User[] $employees         Users within the new_hire_days window.
+ *   @var string[]  $visible_fields    Fields enabled in plugin settings.
+ *   @var int       $new_hire_columns  Number of grid columns (1–3).
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 ?>
 <div class="internal-staff-directory ed-new-hires" id="ed-new-hires">
 
-	<div class="ed-results" id="ed-results">
+	<div class="ed-results" id="ed-results" data-columns="<?php echo esc_attr( $new_hire_columns ); ?>">
 		<?php if ( $employees ) : ?>
 			<?php foreach ( $employees as $user ) :
 				$profile = employee_dir_get_profile( $user->ID );

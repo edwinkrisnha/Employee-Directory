@@ -139,6 +139,7 @@ Go to **Settings → Internal Staff Directory** to configure:
 | Birthday window — days before | 7 | Include birthdays up to this many days in the past in `[employee_birthdays]` (0–30) |
 | Birthday window — days after | 7 | Include birthdays up to this many days ahead in `[employee_birthdays]` (0–30) |
 | Grid columns | 3 | Number of columns shown in grid view: 1, 2, or 3. List and vertical views are not affected |
+| New hire columns | 3 | Number of columns shown in the `[employee_new_hires]` spotlight: 1, 2, or 3 |
 | Available views | Grid, List, Vertical | Which view modes visitors can switch between. The view switcher is hidden when only one is enabled. Grid is always the minimum fallback |
 
 ### Profile Fields

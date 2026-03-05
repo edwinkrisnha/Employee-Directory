@@ -37,8 +37,9 @@ function employee_dir_get_settings() {
 		'dept_colors'      => 1,
 		'message_platform' => 'none',
 		'dicebear_style'   => 'big-smile',
-		'new_hire_days'           => 90,
-		'new_hire_visible_fields' => [ 'department', 'job_title', 'start_date' ],
+		'new_hire_days'            => 90,
+		'new_hire_columns'         => 3,
+		'new_hire_visible_fields'  => [ 'department', 'job_title', 'start_date' ],
 		'blocked_users'           => [],
 		'birthday_days_before'    => 7,
 		'birthday_days_after'     => 7,
@@ -158,6 +159,14 @@ function employee_dir_register_settings() {
 		'employee_dir_new_hire_days',
 		__( '"New" badge window', 'internal-staff-directory' ),
 		'employee_dir_field_new_hire_days',
+		'employee-dir-settings',
+		'employee_dir_main'
+	);
+
+	add_settings_field(
+		'employee_dir_new_hire_columns',
+		__( 'New hire columns', 'internal-staff-directory' ),
+		'employee_dir_field_new_hire_columns',
 		'employee-dir-settings',
 		'employee_dir_main'
 	);
@@ -331,6 +340,11 @@ function employee_dir_sanitize_settings( $input ) {
 	$valid_columns = [ 1, 2, 3 ];
 	$output['grid_columns'] = ( isset( $input['grid_columns'] ) && in_array( (int) $input['grid_columns'], $valid_columns, true ) )
 		? (int) $input['grid_columns']
+		: 3;
+
+	// new_hire_columns: 1, 2, or 3
+	$output['new_hire_columns'] = ( isset( $input['new_hire_columns'] ) && in_array( (int) $input['new_hire_columns'], $valid_columns, true ) )
+		? (int) $input['new_hire_columns']
 		: 3;
 
 	// enabled_views: subset of ['grid','list','vertical']; at least one must remain.
@@ -636,6 +650,34 @@ function employee_dir_field_new_hire_days() {
 	/>
 	<p class="description">
 		<?php esc_html_e( 'Employees who joined within this many days get a "New" badge on their card. Set to 0 to disable.', 'internal-staff-directory' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Render the "New hire columns" radio group (1, 2, or 3 columns).
+ */
+function employee_dir_field_new_hire_columns() {
+	$settings = employee_dir_get_settings();
+	$current  = (int) $settings['new_hire_columns'];
+	$options  = [
+		1 => __( '1 column', 'internal-staff-directory' ),
+		2 => __( '2 columns', 'internal-staff-directory' ),
+		3 => __( '3 columns (default)', 'internal-staff-directory' ),
+	];
+	foreach ( $options as $value => $label ) : ?>
+		<label style="display:inline-block; margin-right: 1rem;">
+			<input
+				type="radio"
+				name="employee_dir_settings[new_hire_columns]"
+				value="<?php echo esc_attr( $value ); ?>"
+				<?php checked( $current, $value ); ?>
+			/>
+			<?php echo esc_html( $label ); ?>
+		</label>
+	<?php endforeach; ?>
+	<p class="description">
+		<?php esc_html_e( 'Number of columns shown in the [employee_new_hires] spotlight.', 'internal-staff-directory' ); ?>
 	</p>
 	<?php
 }

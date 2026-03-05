@@ -332,8 +332,9 @@ function employee_dir_new_hires_shortcode( $atts ) {
 		$query_args['role__in'] = [ $locked_role ];
 	}
 
-	$employees      = employee_dir_get_employees( $query_args );
-	$visible_fields = $settings['new_hire_visible_fields'];
+	$employees         = employee_dir_get_employees( $query_args );
+	$visible_fields    = $settings['new_hire_visible_fields'];
+	$new_hire_columns  = max( 1, min( 3, (int) $settings['new_hire_columns'] ) );
 
 	ob_start();
 	include EMPLOYEE_DIR_PLUGIN_DIR . 'templates/new-hires.php';

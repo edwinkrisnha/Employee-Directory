@@ -4,6 +4,11 @@ All notable changes to Employee Directory will be documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.28.0] — 2026-03-05
+
+### Added
+- **New hire columns setting** — a new **New hire columns** radio group under Settings → Internal Staff Directory controls the number of columns (1, 2, or 3; default 3) in the `[employee_new_hires]` spotlight. Stored as `new_hire_columns` in `employee_dir_settings`. Reuses the existing `[data-columns]` CSS rules — no new styles needed. Collapses to 1 column below 768 px.
+
 ## [1.27.0] — 2026-03-05
 
 ### Added
